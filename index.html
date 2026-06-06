@@ -326,11 +326,35 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .sync-pill.sp-err .sp-dot{background:var(--coral-l);}
 @keyframes sp-pulse{from{opacity:.3}to{opacity:1}}
 
+/* PWA VERSION + UPDATE BANNER */
+.pversion{font-family:'Space Mono',monospace;font-size:9px;color:var(--text-dim);margin-top:4px;letter-spacing:.5px;opacity:.6;}
+.update-banner{display:none;align-items:center;gap:10px;margin-top:10px;padding:10px 12px;background:rgba(255,159,28,.1);border:1px solid rgba(255,159,28,.3);border-radius:var(--rs);animation:fadeUp .4s ease;}
+.update-banner.visible{display:flex;}
+.update-banner-text{flex:1;font-size:11px;color:var(--sun);line-height:1.4;}
+.update-btn{padding:6px 12px;border-radius:8px;background:var(--sun);border:none;color:var(--bg);font-family:'Space Mono',monospace;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0;}
+.update-btn:hover{background:var(--sun-l);transform:scale(1.04);}
+
+/* STARTUP CLOUD LOAD OVERLAY */
+.boot-overlay{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .5s ease;pointer-events:none;}
+.boot-overlay.fade-out{opacity:0;}
+.boot-overlay.hidden{display:none;}
+.boot-spinner{width:40px;height:40px;border:3px solid rgba(255,159,28,.15);border-top-color:var(--sun);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.boot-msg{font-family:'Space Mono',monospace;font-size:12px;color:var(--text-dim);letter-spacing:1px;}
+.boot-logo{font-size:40px;margin-bottom:4px;}
+
 /* Responsive */
 @media(max-width:768px){.shell{grid-template-columns:1fr;}.sidebar{position:relative;height:auto;}.main{height:auto;}.panel{padding:22px 16px;}.stats-grid{grid-template-columns:repeat(2,1fr);}}
 </style>
 </head>
 <body>
+<!-- STARTUP BOOT OVERLAY -->
+<div class="boot-overlay" id="bootOverlay">
+  <div class="boot-logo">🧭</div>
+  <div class="boot-spinner"></div>
+  <div class="boot-msg" id="bootMsg">Chargement...</div>
+</div>
+
 <div class="blobs"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div></div>
 
 <div class="shell">
@@ -347,6 +371,11 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     </div>
     <div class="sync-pill sp-idle" id="syncPillSidebar">
       <div class="sp-dot"></div><span id="syncPillSidebarText">Local</span>
+    </div>
+    <div class="pversion" id="appVersionTag">v—</div>
+    <div class="update-banner" id="updateBanner">
+      <div class="update-banner-text">🆕 Mise à jour disponible</div>
+      <button class="update-btn" onclick="applyUpdate()">Mettre à jour</button>
     </div>
   </div>
 
@@ -1867,18 +1896,116 @@ function go(id){
 /* ═══════════════════════════════════════════════════
    INIT
 ═══════════════════════════════════════════════════ */
-function init(){
-  load();
+// ── _renderAll: render/refresh everything from current S ──
+function _renderAll() {
   refreshDashboard();
   refreshXP();
   refreshBadges();
   renderLog();
   renderLegends();
   renderDestin();
-  // Expose weekly section based on GM state
-  const ws=document.getElementById('weeklySection');
-  if(ws)ws.style.display=S.gmActive?'block':'none';
-  document.getElementById('gmToggle')?.classList.toggle('on',S.gmActive);
+  const ws = document.getElementById('weeklySection');
+  if (ws) ws.style.display = S.gmActive ? 'block' : 'none';
+  document.getElementById('gmToggle')?.classList.toggle('on', S.gmActive);
+}
+
+// ── _dismissBootOverlay: fade then hide the boot screen ──
+function _dismissBootOverlay() {
+  const overlay = document.getElementById('bootOverlay');
+  if (!overlay) return;
+  overlay.classList.add('fade-out');
+  setTimeout(() => overlay.classList.add('hidden'), 520);
+}
+
+// ── _setBootMsg: update the message shown in the boot overlay ──
+function _setBootMsg(msg) {
+  const el = document.getElementById('bootMsg');
+  if (el) el.textContent = msg;
+}
+
+async function init() {
+  // ① Always load local state first — instant, no network needed
+  load();
+  _renderAll();
+
+  // ② Try to load from Supabase (source of truth)
+  // _sb may not exist yet if Supabase CDN hasn't loaded — guard with typeof
+  if (typeof _sb === 'undefined') {
+    // Supabase client not ready — skip cloud load silently
+    setSyncStatus('idle');
+    _dismissBootOverlay();
+    return;
+  }
+
+  _setBootMsg('Synchronisation cloud...');
+  setSyncStatus('syncing');
+
+  try {
+    // 3s timeout so we never hang if Supabase is slow
+    const _cloudQuery = _sb
+      .from(SAVE_TABLE)
+      .select('data')
+      .eq('id', SAVE_ID)
+      .single();
+
+    const _timeoutPromise = new Promise(resolve =>
+      setTimeout(() => resolve({ data: null, error: new Error('timeout') }), 6000)
+    );
+
+    const { data, error } = await Promise.race([_cloudQuery, _timeoutPromise]);
+
+    if (error) throw error;
+
+    if (data && data.data) {
+      // Cloud data found — apply without confirm (auto-load, not manual)
+      _applyRemoteState(data.data);
+      const ts = new Date().toLocaleTimeString('fr-FR');
+      setSyncStatus('ok', ts);
+      console.log('[Allan RPG] Cloud state loaded at startup —', ts);
+    } else {
+      // No cloud save yet — local state is fine, push it up
+      setSyncStatus('idle');
+      console.log('[Allan RPG] No cloud save found — keeping local state');
+    }
+  } catch (err) {
+    // Network error, timeout, or Supabase unavailable — fall back to local silently
+    const _isTimeout = err.message === 'timeout';
+    // Timeout is expected in dev/preview environments — log, not warn
+    if (_isTimeout) {
+      console.log('[Allan RPG] Cloud load timed out — using local state (normal in preview/dev)');
+      setSyncStatus('idle'); // don't show red pill for a timeout
+    } else {
+      console.warn('[Allan RPG] Cloud load failed at startup — using local state:', err.message || err);
+      setSyncStatus('err');
+      // Auto-reset to idle after 4s so the pill doesn't stay red forever
+      setTimeout(() => setSyncStatus('idle'), 4000);
+    }
+  } finally {
+    _dismissBootOverlay();
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   PWA VERSION
+═══════════════════════════════════════════════════ */
+const APP_VERSION = '1.2.0';
+
+// Stamp the version in the sidebar as soon as JS runs
+(function stampVersion() {
+  const el = document.getElementById('appVersionTag');
+  if (el) el.textContent = 'v' + APP_VERSION;
+})();
+
+// Called by the update button — skips waiting SW then reloads
+// localStorage and Supabase data are NOT touched
+function applyUpdate() {
+  if (_swWaitingWorker) {
+    _swWaitingWorker.postMessage({ type: 'SKIP_WAITING' });
+    // Page will reload on 'controllerchange' event (wired in SW registration)
+  } else {
+    // Fallback: hard reload if we lost the reference
+    window.location.reload();
+  }
 }
 
 /* ═══════════════════════════════════════════════════
@@ -1975,6 +2102,41 @@ async function saveToCloud({ auto = false } = {}) {
   }
 }
 
+// ── _applyRemoteState: shared by auto-load on startup and manual loadFromCloud ──
+// Writes remote data into S, persists locally, re-renders everything.
+// Sets _cloudSaving=true around save() to prevent spurious auto-sync loop.
+function _applyRemoteState(remote) {
+  S.done     = remote.done     || {};
+  S.biomes   = remote.biomes   || { bm0: true };
+  S.collect  = remote.collect  || {};
+  S.bosses   = remote.bosses   || {};
+  S.wish     = remote.wish     || {};
+  S.gmActive = remote.gmActive || false;
+  S.contrat  = remote.contrat  || {};
+  S.destin   = remote.destin   || {};
+  S.legends  = remote.legends  || [];
+  S.log      = remote.log      || [];
+
+  _cloudSaving = true;
+  save(); // persist to localStorage without triggering scheduleCloudSave
+  _cloudSaving = false;
+
+  refreshXP();
+  refreshBadges();
+  refreshDashboard();
+  refreshContrat();
+  renderLog();
+  renderLegends();
+  renderDestin();
+  if (typeof buildExportStats === 'function') buildExportStats();
+  document.getElementById('gmToggle')?.classList.toggle('on', S.gmActive);
+  const activePanel = document.querySelector('.panel.active');
+  if (activePanel) {
+    const pid = activePanel.id.replace('s-', '');
+    if (ACC_MAP[pid]) renderAcc(pid);
+  }
+}
+
 async function loadFromCloud() {
   const statusEl = document.getElementById('cloudLoadStatus');
   statusEl.textContent = '⏳ Chargement en cours...';
@@ -1993,38 +2155,8 @@ async function loadFromCloud() {
       return;
     }
 
-    // Restore state
-    const remote = data.data;
-    S.done      = remote.done      || {};
-    S.biomes    = remote.biomes    || { bm0: true };
-    S.collect   = remote.collect   || {};
-    S.bosses    = remote.bosses    || {};
-    S.wish      = remote.wish      || {};
-    S.gmActive  = remote.gmActive  || false;
-    S.contrat   = remote.contrat   || {};
-    S.destin    = remote.destin    || {};
-    S.legends   = remote.legends   || [];
-    S.log       = remote.log       || [];
-
-    // Persist locally — set flag so save() doesn't schedule a cloud sync
-    _cloudSaving = true;
-    save();
-    _cloudSaving = false;
-    refreshXP();
-    refreshBadges();
-    refreshDashboard();
-    refreshContrat();
-    renderLog();
-    renderLegends();
-    renderDestin();
-    buildExportStats();
-    document.getElementById('gmToggle')?.classList.toggle('on', S.gmActive);
-    // Re-render any open accordion
-    const activePanel = document.querySelector('.panel.active');
-    if (activePanel) {
-      const pid = activePanel.id.replace('s-', '');
-      if (ACC_MAP[pid]) renderAcc(pid);
-    }
+    // Restore state via shared helper
+    _applyRemoteState(data.data);
 
     statusEl.textContent = '✓ Sauvegarde cloud chargée — ' + new Date().toLocaleTimeString('fr-FR');
     statusEl.className = 'sl-cloud-status ok';
@@ -2037,19 +2169,64 @@ async function loadFromCloud() {
 
 init();
 
-// ── Service Worker registration ──────────────
-if ('serviceWorker' in navigator) {
+// ── Service Worker registration + update detection ──
+// Holds reference to the waiting (new) SW so applyUpdate() can activate it
+let _swWaitingWorker = null;
+
+function _showUpdateBanner(worker) {
+  _swWaitingWorker = worker;
+  const banner = document.getElementById('updateBanner');
+  if (banner) banner.classList.add('visible');
+  console.log('[Allan RPG] Update available — banner shown');
+}
+
+// Environments where the SW files don't exist — skip silently
+const _swUnsupportedHosts = ['claudeusercontent.com', 'localhost', '127.0.0.1'];
+const _swEnabled = 'serviceWorker' in navigator &&
+  !_swUnsupportedHosts.some(h => location.hostname.includes(h));
+
+if (_swEnabled) {
   window.addEventListener('load', () => {
     navigator.serviceWorker
       .register('/allan-rpg/service-worker.js', { scope: '/allan-rpg/' })
       .then(reg => {
         console.log('[Allan RPG] SW registered:', reg.scope);
+
+        // Case 1 — A new SW is already waiting (user had old page open)
+        if (reg.waiting) {
+          _showUpdateBanner(reg.waiting);
+        }
+
+        // Case 2 — A new SW starts installing while the page is open
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          if (!newWorker) return;
+          newWorker.addEventListener('statechange', () => {
+            // New SW installed and waiting — safe to activate
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              _showUpdateBanner(newWorker);
+            }
+          });
+        });
+
+        // Poll for updates every 60 minutes (background check)
+        setInterval(() => reg.update().catch(() => {}), 60 * 60 * 1000);
       })
       .catch(err => {
         console.warn('[Allan RPG] SW registration failed:', err);
       });
+
+    // Case 3 — SW controller changes (applyUpdate() sent SKIP_WAITING)
+    // Reload the page to activate the new SW — data is untouched
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!refreshing) {
+        refreshing = true;
+        window.location.reload();
+      }
+    });
   });
-}
+} // end if (_swEnabled)
 </script>
 </body>
 </html>

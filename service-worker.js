@@ -3,7 +3,7 @@
    Cache-first strategy for offline play
 ═══════════════════════════════════════════════ */
 
-const CACHE_NAME = 'allan-rpg-v1';
+const CACHE_NAME = 'allan-rpg-v1.2.0';
 
 // Files to pre-cache on install
 const PRECACHE_URLS = [
@@ -15,6 +15,15 @@ const PRECACHE_URLS = [
   '/allan-rpg/icon-maskable-512.png',
 ];
 
+
+// ── SKIP_WAITING: called by applyUpdate() in the page ──
+// Activates this SW immediately without waiting for old tabs to close.
+// Does NOT touch localStorage or any cached data.
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
 // ── Install: pre-cache shell ──────────────────
 self.addEventListener('install', event => {
   event.waitUntil(
