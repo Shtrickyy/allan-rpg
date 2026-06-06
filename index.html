@@ -343,6 +343,99 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .boot-msg{font-family:'Space Mono',monospace;font-size:12px;color:var(--text-dim);letter-spacing:1px;}
 .boot-logo{font-size:40px;margin-bottom:4px;}
 
+
+/* ══════════════════════════════════════
+   MEMORIES SYSTEM
+══════════════════════════════════════ */
+/* Sidebar persistent moment button */
+.mem-sidebar-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px 16px;margin:12px 0 0;border-radius:var(--rs);background:linear-gradient(135deg,var(--lav),#5e21a8);color:#fff;border:none;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:all .2s;box-shadow:0 3px 14px rgba(155,93,229,.35);letter-spacing:-.1px;}
+.mem-sidebar-btn:hover{background:linear-gradient(135deg,#b070ff,#7030d0);box-shadow:0 6px 22px rgba(155,93,229,.55);transform:translateY(-1px);}
+.mem-sidebar-btn:active{transform:translateY(0);box-shadow:0 2px 8px rgba(155,93,229,.3);}
+
+/* FAB button */
+.mem-fab{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:var(--r);background:linear-gradient(135deg,var(--lav),#7b35c1);color:#fff;border:none;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(155,93,229,.35);}
+.mem-fab:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(155,93,229,.5);}
+/* Primary FAB — full-width, very visible */
+.mem-fab-primary{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:18px 24px;border-radius:var(--r);background:linear-gradient(135deg,var(--lav),#5e21a8);color:#fff;border:none;font-family:'Syne',sans-serif;font-weight:800;font-size:17px;cursor:pointer;transition:all .25s;box-shadow:0 6px 28px rgba(155,93,229,.45);margin-bottom:20px;letter-spacing:-.3px;}
+.mem-fab-primary:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(155,93,229,.6);}
+.mem-fab-primary:active{transform:translateY(0);box-shadow:0 4px 16px rgba(155,93,229,.35);}
+/* Dashboard shortcut card */
+.mem-dash-shortcut{display:flex;align-items:center;gap:16px;padding:16px 20px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all .2s;margin-top:24px;}
+.mem-dash-shortcut:hover{border-color:rgba(155,93,229,.35);background:rgba(155,93,229,.06);transform:translateY(-1px);}
+
+/* Memory cards grid */
+.memories-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
+
+/* Memory card */
+.mem-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:all .25s;position:relative;}
+.mem-card:hover{border-color:var(--border2);transform:translateY(-2px);}
+.mem-card-type-bar{height:3px;}
+.mem-card-type-bar.quest{background:linear-gradient(90deg,var(--sun),var(--coral));}
+.mem-card-type-bar.free{background:linear-gradient(90deg,var(--lav),var(--sky));}
+.mem-card-photos{display:flex;gap:4px;height:160px;overflow:hidden;}
+.mem-card-photos img{width:100%;height:160px;object-fit:cover;flex:1;min-width:0;}
+.mem-card-photos.multi img{height:160px;}
+.mem-card-body{padding:14px 16px;}
+.mem-card-meta{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+.mem-card-mood{font-size:20px;}
+.mem-card-date{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);}
+.mem-card-lieu{font-size:11px;color:var(--text-dim);display:flex;align-items:center;gap:4px;}
+.mem-card-lieu::before{content:'📍';font-size:10px;}
+.mem-card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:var(--text);margin-bottom:6px;line-height:1.3;}
+.mem-card-quest-tag{display:inline-flex;align-items:center;gap:4px;font-family:'Space Mono',monospace;font-size:9px;padding:2px 8px;border-radius:10px;background:rgba(255,159,28,.1);border:1px solid rgba(255,159,28,.2);color:var(--sun);margin-bottom:8px;}
+.mem-card-anecdote{font-size:12px;color:var(--text-mid);line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.mem-card-actions{display:flex;gap:6px;padding:10px 16px 14px;border-top:1px solid var(--border);}
+.mem-card-btn{padding:5px 12px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--text-dim);font-family:'Space Mono',monospace;font-size:10px;cursor:pointer;transition:all .18s;}
+.mem-card-btn:hover{color:var(--text);border-color:var(--border2);background:rgba(255,255,255,.05);}
+.mem-card-btn.del:hover{color:var(--coral-l);border-color:rgba(239,71,111,.3);}
+
+/* Modal */
+.mem-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:8000;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px);animation:fadeIn .2s ease;}
+.mem-modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);width:100%;max-width:560px;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;}
+.mem-modal::-webkit-scrollbar{width:3px;}
+.mem-modal::-webkit-scrollbar-thumb{background:var(--border2);}
+.mem-modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 22px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:1;}
+.mem-modal-title{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;}
+.mem-modal-close{background:none;border:none;color:var(--text-dim);font-size:18px;cursor:pointer;padding:4px 8px;border-radius:6px;transition:all .15s;line-height:1;}
+.mem-modal-close:hover{color:var(--text);background:rgba(255,255,255,.07);}
+.mem-modal-body{padding:20px 22px;display:flex;flex-direction:column;gap:16px;}
+.mem-modal-footer{padding:16px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;}
+.mem-field{display:flex;flex-direction:column;gap:6px;}
+.mem-field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.mem-label{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);}
+.mem-input{background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:var(--rs);padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s;width:100%;}
+.mem-input:focus{border-color:rgba(155,93,229,.5);}
+.mem-input[type="date"]{color-scheme:dark;}
+.mem-textarea{min-height:90px;resize:vertical;line-height:1.6;}
+.mem-moods{display:flex;gap:8px;flex-wrap:wrap;}
+.mem-mood{font-size:22px;background:rgba(255,255,255,.04);border:2px solid transparent;border-radius:10px;padding:6px 10px;cursor:pointer;transition:all .15s;line-height:1;}
+.mem-mood:hover{background:rgba(255,255,255,.09);}
+.mem-mood.selected{border-color:var(--lav);background:rgba(155,93,229,.15);}
+.mem-photos-upload{margin-bottom:10px;}
+.mem-photo-add-btn{padding:8px 16px;border-radius:var(--rs);border:1px dashed var(--border2);background:transparent;color:var(--text-mid);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .2s;}
+.mem-photo-add-btn:hover{border-color:var(--lav-l);color:var(--lav-l);}
+.mem-photo-add-btn:disabled{opacity:.4;cursor:not-allowed;}
+.mem-photos-preview{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+.mem-photo-thumb{position:relative;width:80px;height:80px;border-radius:var(--rs);overflow:hidden;border:1px solid var(--border);}
+.mem-photo-thumb img{width:100%;height:100%;object-fit:cover;}
+.mem-photo-remove{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.7);border:none;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
+.mem-photo-status{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);min-height:16px;}
+.mem-photo-status.uploading{color:var(--lav-l);}
+.mem-photo-status.ok{color:var(--ocean);}
+.mem-photo-status.err{color:var(--coral-l);}
+.mem-btn-cancel{padding:10px 20px;border-radius:var(--rs);border:1px solid var(--border2);background:transparent;color:var(--text-dim);font-family:'Space Mono',monospace;font-size:12px;cursor:pointer;transition:all .2s;}
+.mem-btn-cancel:hover{color:var(--text);}
+.mem-btn-save{padding:10px 24px;border-radius:var(--rs);background:linear-gradient(135deg,var(--lav),#7b35c1);border:none;color:#fff;font-family:'Space Mono',monospace;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;}
+.mem-btn-save:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(155,93,229,.4);}
+.mem-btn-save:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+/* Quest-linked banner in toggleQuest toast-area */
+.mem-quest-offer{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid rgba(155,93,229,.4);border-radius:var(--r);padding:14px 20px;z-index:7000;display:flex;align-items:center;gap:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);animation:toastIn .3s ease;max-width:380px;width:calc(100vw - 32px);}
+.mem-quest-offer-text{font-size:13px;color:var(--text);flex:1;line-height:1.4;}
+.mem-quest-offer-btns{display:flex;gap:8px;flex-shrink:0;}
+.mem-quest-offer-yes{padding:7px 14px;border-radius:var(--rs);background:var(--lav);border:none;color:#fff;font-family:'Space Mono',monospace;font-size:11px;cursor:pointer;}
+.mem-quest-offer-no{padding:7px 10px;border-radius:var(--rs);border:1px solid var(--border2);background:transparent;color:var(--text-dim);font-family:'Space Mono',monospace;font-size:11px;cursor:pointer;}
+
 /* Responsive */
 @media(max-width:768px){.shell{grid-template-columns:1fr;}.sidebar{position:relative;height:auto;}.main{height:auto;}.panel{padding:22px 16px;}.stats-grid{grid-template-columns:repeat(2,1fr);}}
 </style>
@@ -379,6 +472,13 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     </div>
   </div>
 
+  <!-- Persistent shortcut — visible from any section -->
+  <div style="padding:0 10px;">
+    <button class="mem-sidebar-btn" onclick="openMemoryModal(null)">
+      <span style="font-size:15px;">📸</span> ＋ Moment de vie
+    </button>
+  </div>
+
   <div class="ng">
     <div class="ng-lbl">Monde</div>
     <button class="ni active" onclick="go('dashboard')"><span class="ni-ico">🗺️</span>Tableau de bord</button>
@@ -400,6 +500,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     <button class="ni" onclick="go('legendary')"><span class="ni-ico">🔥</span>Légendaires<span class="nbadge" id="nb-legendary">0/0</span></button>
     <button class="ni" onclick="go('collectibles')"><span class="ni-ico">💎</span>Collectibles<span class="nbadge" id="nb-collect">0/0</span></button>
     <button class="ni" onclick="go('wishlist')"><span class="ni-ico">⭐</span>Mes Favoris<span class="nbadge" id="nb-wish">0</span></button>
+    <button class="ni" onclick="go('memories')"><span class="ni-ico">📸</span>Souvenirs<span class="nbadge" id="nb-memories">0</span></button>
     <button class="ni" onclick="go('bosses')"><span class="ni-ico">🐉</span>Boss secrets</button>
     <button class="ni" onclick="go('legends')"><span class="ni-ico">📖</span>Journal des Légendes</button>
     <button class="ni" onclick="go('log')"><span class="ni-ico">📜</span>Journal</button>
@@ -442,6 +543,16 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   <div class="stats-grid" id="dashStats"></div>
   <div class="ssub">Progression par guilde</div>
   <div id="guildProgress" style="display:flex;flex-direction:column;gap:10px;"></div>
+
+  <!-- Quick memory shortcut -->
+  <div class="mem-dash-shortcut" onclick="openMemoryModal(null)">
+    <span style="font-size:22px;">📸</span>
+    <div style="flex:1;">
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--text);margin-bottom:2px;">Ajouter un moment de vie</div>
+      <div style="font-size:12px;color:var(--text-dim);">Capture un souvenir, une rencontre, une journée marquante.</div>
+    </div>
+    <span style="font-size:18px;color:var(--text-dim);">›</span>
+  </div>
 </div>
 
 <!-- MAIN QUEST -->
@@ -596,6 +707,38 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   <div class="empty" id="logEmpty">L'aventure commence ici...</div>
 </div>
 
+<!-- MEMORIES -->
+<div class="panel" id="s-memories">
+  <div class="hero">
+    <div class="stag" style="background:rgba(155,93,229,.1);color:var(--lav-l);">📸 Moments de vie</div>
+    <div class="stitle">Mes moments de vie</div>
+    <div class="sdesc">Tes souvenirs importants — liés à une quête ou complètement libres. Ton journal personnel.</div>
+  </div>
+
+  <!-- Primary CTA — très visible, full-width -->
+  <button class="mem-fab-primary" onclick="openMemoryModal(null)">
+    <span style="font-size:22px;">＋</span>
+    <span>Ajouter un moment de vie</span>
+  </button>
+
+  <!-- Filters + secondary actions -->
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px;flex-wrap:wrap;">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;" id="memFilterBar">
+      <button class="filter-btn active" data-memf="all" onclick="setMemFilter(this,'all')">Tous</button>
+      <button class="filter-btn" data-memf="quest" onclick="setMemFilter(this,'quest')">🏆 Liés aux quêtes</button>
+      <button class="filter-btn" data-memf="free" onclick="setMemFilter(this,'free')">✨ Moments libres</button>
+    </div>
+  </div>
+
+  <div id="memoriesGrid" class="memories-grid"></div>
+  <div class="empty" id="memoriesEmpty" style="display:none">
+    <div style="font-size:56px;margin-bottom:16px;">📸</div>
+    <div style="font-size:16px;font-weight:600;margin-bottom:8px;color:var(--text);">Aucun moment enregistré</div>
+    <div style="margin-bottom:20px;">Commence par ajouter un moment important de ta vie,<br>ou valide une quête pour en créer un automatiquement.</div>
+    <button class="mem-fab-primary" style="margin:0 auto;" onclick="openMemoryModal(null)">＋ Ajouter un moment de vie</button>
+  </div>
+</div>
+
 <!-- WISHLIST -->
 <div class="panel" id="s-wishlist">
   <div class="hero">
@@ -654,6 +797,72 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     <div class="sl-desc">Restaure ta progression depuis le Cloud. <strong style="color:var(--coral-l);">Attention :</strong> cela écrasera ta sauvegarde locale.</div>
     <button class="sl-btn sl-btn-cloud-load" onclick="loadFromCloud()">☁️ Charger depuis le Cloud</button>
     <div class="sl-cloud-status" id="cloudLoadStatus"></div>
+  </div>
+</div>
+
+<!-- MEMORY MODAL -->
+<div class="mem-modal-backdrop" id="memModalBackdrop" onclick="closeMemoryModal(event)" style="display:none">
+  <div class="mem-modal" id="memModal">
+    <div class="mem-modal-header">
+      <div class="mem-modal-title" id="memModalTitle">Nouveau souvenir</div>
+      <button class="mem-modal-close" onclick="closeMemoryModal()">✕</button>
+    </div>
+    <div class="mem-modal-body">
+      <input type="hidden" id="memId">
+      <input type="hidden" id="memType" value="free">
+      <input type="hidden" id="memQuestId" value="">
+
+      <div class="mem-field">
+        <label class="mem-label">Titre *</label>
+        <input type="text" class="mem-input" id="memTitle" placeholder="Premier meetup, Mariage de Sarah..." maxlength="100">
+      </div>
+
+      <div class="mem-field-row">
+        <div class="mem-field">
+          <label class="mem-label">Date</label>
+          <input type="date" class="mem-input" id="memDate">
+        </div>
+        <div class="mem-field">
+          <label class="mem-label">Lieu</label>
+          <input type="text" class="mem-input" id="memLieu" placeholder="Paris, Tokyo..." maxlength="80">
+        </div>
+      </div>
+
+      <div class="mem-field">
+        <label class="mem-label">Humeur</label>
+        <div class="mem-moods" id="memMoods">
+          <button type="button" class="mem-mood" data-mood="🔥">🔥</button>
+          <button type="button" class="mem-mood" data-mood="😊">😊</button>
+          <button type="button" class="mem-mood" data-mood="🥹">🥹</button>
+          <button type="button" class="mem-mood" data-mood="😤">😤</button>
+          <button type="button" class="mem-mood" data-mood="😰">😰</button>
+          <button type="button" class="mem-mood" data-mood="🤩">🤩</button>
+          <button type="button" class="mem-mood" data-mood="🌊">🌊</button>
+          <button type="button" class="mem-mood" data-mood="✨">✨</button>
+        </div>
+      </div>
+
+      <div class="mem-field">
+        <label class="mem-label">Anecdote</label>
+        <textarea class="mem-input mem-textarea" id="memAnecdote" placeholder="Ce qui s'est passé, ce que tu as ressenti, ce que tu gardes..."></textarea>
+      </div>
+
+      <div class="mem-field">
+        <label class="mem-label">Photos <span style="color:var(--text-dim);font-weight:400;">(max 5 · redimensionnées auto · stockées sur Supabase)</span></label>
+        <div class="mem-photos-upload">
+          <input type="file" id="memPhotosInput" accept="image/*" multiple style="display:none" onchange="handlePhotoSelect(event)">
+          <button type="button" class="mem-photo-add-btn" onclick="document.getElementById('memPhotosInput').click()" id="memPhotoAddBtn">
+            📷 Ajouter des photos
+          </button>
+        </div>
+        <div class="mem-photos-preview" id="memPhotosPreview"></div>
+        <div class="mem-photo-status" id="memPhotoStatus"></div>
+      </div>
+    </div>
+    <div class="mem-modal-footer">
+      <button class="mem-btn-cancel" onclick="closeMemoryModal()">Annuler</button>
+      <button class="mem-btn-save" id="memSaveBtn" onclick="saveMemory()">💾 Enregistrer</button>
+    </div>
   </div>
 </div>
 
@@ -1083,10 +1292,11 @@ let S={
   contrat:{},       // cat -> {questId,questName,done,week}
   destin:{text:'',done:false,week:''},
   legends:[],       // [{id,date,questName,xp,story}]
+  memories:[],     // [{id,type,questId?,title,date,lieu,humeur,anecdote,photos:[{path,url}],createdAt,updatedAt}]
   log:[],
 };
 
-function load(){try{const r=localStorage.getItem('allanrpg_v4');if(r){S=JSON.parse(r);if(!S.wish)S.wish={};}}catch(e){}}
+function load(){try{const r=localStorage.getItem('allanrpg_v4');if(r){S=JSON.parse(r);if(!S.wish)S.wish={};if(!S.memories)S.memories=[];}}catch(e){}}
 function save(){
   localStorage.setItem('allanrpg_v4', JSON.stringify(S));
   // Trigger debounced cloud sync — only if NOT already inside saveToCloud
@@ -1283,6 +1493,8 @@ function toggleQuest(qid,skey){
     addLog(`Quête accomplie : <span class="hi">${q.name}</span> <span class="ok">(+${q.xp} XP)</span>`);
     // Add to Journal des Légendes if xp >= 300
     if(q.xp>=300) addLegend(q);
+    // Offer to add a memory (non-blocking, shown after render)
+    setTimeout(()=>offerMemoryForQuest(q), 400);
     // Mark contrat if pinned
     Object.keys(S.contrat).forEach(cat=>{
       if(S.contrat[cat]&&S.contrat[cat].questId===qid) S.contrat[cat].done=true;
@@ -1593,6 +1805,7 @@ function buildExportStats(){
   const biomeCount=Object.values(S.biomes).filter(Boolean).length;
   const collectCount=[...COLLECTIBLES.enc,...COLLECTIBLES.skills].filter(c=>S.collect[c.id]).length;
   const legendCount=S.legends?S.legends.length:0;
+  const memoryCount=S.memories?S.memories.length:0;
   const logCount=S.log?S.log.length:0;
   el.innerHTML=`
     <div class="sl-stat"><div class="sl-stat-ico">⚡</div><div class="sl-stat-label">XP gagnés</div><div class="sl-stat-val" style="color:var(--sun)">${earned.toLocaleString('fr')} / ${total.toLocaleString('fr')}</div></div>
@@ -1600,6 +1813,7 @@ function buildExportStats(){
     <div class="sl-stat"><div class="sl-stat-ico">🌍</div><div class="sl-stat-label">Biomes débloqués</div><div class="sl-stat-val" style="color:var(--sky-l)">${biomeCount}</div></div>
     <div class="sl-stat"><div class="sl-stat-ico">💎</div><div class="sl-stat-label">Collectibles trouvés</div><div class="sl-stat-val" style="color:var(--lav-l)">${collectCount}</div></div>
     <div class="sl-stat"><div class="sl-stat-ico">📖</div><div class="sl-stat-label">Entrées dans les Légendes</div><div class="sl-stat-val" style="color:var(--coral-l)">${legendCount}</div></div>
+    <div class="sl-stat"><div class="sl-stat-ico">📸</div><div class="sl-stat-label">Souvenirs</div><div class="sl-stat-val" style="color:var(--lav-l)">${memoryCount}</div></div>
     <div class="sl-stat"><div class="sl-stat-ico">📜</div><div class="sl-stat-label">Entrées dans le journal</div><div class="sl-stat-val" style="color:var(--text-mid)">${logCount}</div></div>
   `;
 }
@@ -1624,6 +1838,7 @@ function exportSave(){
     destin:S.destin,
     wishlist:S.wish||{},
     legends:S.legends||[],
+    memories:S.memories||[],
     journal:S.log||[],
   };
 
@@ -1663,6 +1878,7 @@ function handleImport(event){
 • ${(data.completedQuests||[]).length} quêtes accomplies
 • ${data.xp||0} XP
 • ${(data.legends||[]).length} légendes
+• ${(data.memories||[]).length} souvenirs
 • ${(data.journal||[]).length} entrées journal
 
 Cela remplacera ta progression actuelle.`)){
@@ -1681,6 +1897,7 @@ Cela remplacera ta progression actuelle.`)){
         contrat:data.contrat||{},
         destin:data.destin||{},
         legends:data.legends||[],
+        memories:data.memories||[],
         log:data.journal||[],
       };
       // Rebuild done map from completedQuests array
@@ -1705,6 +1922,411 @@ Cela remplacera ta progression actuelle.`)){
     }
   };
   reader.readAsText(file);
+}
+
+/* ═══════════════════════════════════════════════════
+   MEMORIES — v1.3.0
+   Architecture: metadata in STATE/Supabase saves table
+                 photos in Supabase Storage bucket "memories"
+═══════════════════════════════════════════════════ */
+
+const MEM_STORAGE_BUCKET = 'memories';
+const MEM_MAX_PHOTOS = 5;
+const MEM_MAX_WIDTH  = 1600;
+const MEM_JPEG_Q     = 0.8;
+
+// ── Pending photos in modal (File objects, not yet uploaded) ──
+let _memPendingPhotos = []; // [{file, previewUrl, existingUrl?, existingPath?}]
+let _memCurrentMood = '';
+let _memFilterMode = 'all';
+
+// ─────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────
+function _memId() {
+  return 'mem_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+}
+
+function _memFormatDate(isoDate) {
+  if (!isoDate) return '';
+  try {
+    return new Date(isoDate + 'T00:00:00').toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'});
+  } catch { return isoDate; }
+}
+
+function _memQuestName(questId) {
+  if (!questId) return null;
+  const q = allQuests().find(x => x.id === questId);
+  return q ? q.name : null;
+}
+
+function _refreshMemBadge() {
+  const el = document.getElementById('nb-memories');
+  if (el) el.textContent = (S.memories || []).length;
+}
+
+// ─────────────────────────────────────────
+// IMAGE RESIZE (canvas, client-side)
+// ─────────────────────────────────────────
+async function _resizeImage(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      let {naturalWidth: w, naturalHeight: h} = img;
+      if (w > MEM_MAX_WIDTH) {
+        h = Math.round(h * MEM_MAX_WIDTH / w);
+        w = MEM_MAX_WIDTH;
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(blob => {
+        if (!blob) { reject(new Error('Canvas toBlob failed')); return; }
+        resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), {type:'image/jpeg'}));
+      }, 'image/jpeg', MEM_JPEG_Q);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Image load failed')); };
+    img.src = url;
+  });
+}
+
+// ─────────────────────────────────────────
+// SUPABASE STORAGE UPLOAD
+// ─────────────────────────────────────────
+async function _uploadPhoto(file, memId) {
+  const path = `${memId}/${Date.now()}_${file.name}`;
+  const { data, error } = await _sb.storage
+    .from(MEM_STORAGE_BUCKET)
+    .upload(path, file, { contentType: 'image/jpeg', upsert: false });
+  if (error) throw error;
+  const { data: urlData } = _sb.storage
+    .from(MEM_STORAGE_BUCKET)
+    .getPublicUrl(path);
+  return { path, url: urlData.publicUrl };
+}
+
+async function _deletePhoto(path) {
+  try {
+    await _sb.storage.from(MEM_STORAGE_BUCKET).remove([path]);
+  } catch(e) {
+    console.warn('[Memories] Could not delete photo:', path, e);
+  }
+}
+
+// ─────────────────────────────────────────
+// RENDER MEMORIES GRID
+// ─────────────────────────────────────────
+function renderMemories() {
+  const grid = document.getElementById('memoriesGrid');
+  const empty = document.getElementById('memoriesEmpty');
+  if (!grid) return;
+
+  let mems = [...(S.memories || [])].sort((a,b) => (b.date||b.createdAt||'').localeCompare(a.date||a.createdAt||''));
+  if (_memFilterMode === 'quest') mems = mems.filter(m => m.type === 'quest');
+  if (_memFilterMode === 'free')  mems = mems.filter(m => m.type === 'free');
+
+  if (mems.length === 0) {
+    grid.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  grid.innerHTML = '';
+  mems.forEach(mem => {
+    const card = document.createElement('div');
+    card.className = 'mem-card';
+
+    const questName = _memQuestName(mem.questId);
+    const photos = mem.photos || [];
+    const photosHtml = photos.length > 0
+      ? `<div class="mem-card-photos${photos.length > 1 ? ' multi' : ''}">
+          ${photos.slice(0,3).map(p => `<img src="${p.url}" alt="" loading="lazy">`).join('')}
+        </div>`
+      : '';
+
+    card.innerHTML = `
+      <div class="mem-card-type-bar ${mem.type}"></div>
+      ${photosHtml}
+      <div class="mem-card-body">
+        <div class="mem-card-meta">
+          ${mem.humeur ? `<span class="mem-card-mood">${mem.humeur}</span>` : ''}
+          <span class="mem-card-date">${_memFormatDate(mem.date)}</span>
+          ${mem.lieu ? `<span class="mem-card-lieu">${mem.lieu}</span>` : ''}
+        </div>
+        ${questName ? `<div class="mem-card-quest-tag">🏆 ${questName}</div>` : ''}
+        <div class="mem-card-title">${mem.title||'Sans titre'}</div>
+        ${mem.anecdote ? `<div class="mem-card-anecdote">${mem.anecdote.replace(/</g,'&lt;')}</div>` : ''}
+      </div>
+      <div class="mem-card-actions">
+        <button class="mem-card-btn" onclick="openMemoryModal('${mem.id}')">✏ Modifier</button>
+        <button class="mem-card-btn del" onclick="deleteMemory('${mem.id}')">🗑 Supprimer</button>
+      </div>`;
+    grid.appendChild(card);
+  });
+  _refreshMemBadge();
+}
+
+function setMemFilter(btn, mode) {
+  _memFilterMode = mode;
+  document.querySelectorAll('#memFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMemories();
+}
+
+// ─────────────────────────────────────────
+// MODAL — OPEN / CLOSE
+// ─────────────────────────────────────────
+function openMemoryModal(memIdOrNull, prefill = {}) {
+  _memPendingPhotos = [];
+  _memCurrentMood = '';
+
+  const backdrop = document.getElementById('memModalBackdrop');
+  const titleEl  = document.getElementById('memModalTitle');
+
+  document.getElementById('memId').value       = '';
+  document.getElementById('memType').value     = prefill.type || 'free';
+  document.getElementById('memQuestId').value  = prefill.questId || '';
+  document.getElementById('memTitle').value    = prefill.title || '';
+  document.getElementById('memDate').value     = prefill.date || new Date().toISOString().slice(0,10);
+  document.getElementById('memLieu').value     = prefill.lieu || '';
+  document.getElementById('memAnecdote').value = prefill.anecdote || '';
+  document.getElementById('memPhotosPreview').innerHTML = '';
+  document.getElementById('memPhotoStatus').textContent = '';
+  document.getElementById('memSaveBtn').disabled = false;
+
+  // Reset moods
+  document.querySelectorAll('.mem-mood').forEach(b => b.classList.remove('selected'));
+
+  if (memIdOrNull) {
+    // Edit mode
+    const mem = (S.memories||[]).find(m => m.id === memIdOrNull);
+    if (!mem) return;
+    document.getElementById('memId').value       = mem.id;
+    document.getElementById('memType').value     = mem.type;
+    document.getElementById('memQuestId').value  = mem.questId || '';
+    document.getElementById('memTitle').value    = mem.title || '';
+    document.getElementById('memDate').value     = mem.date || '';
+    document.getElementById('memLieu').value     = mem.lieu || '';
+    document.getElementById('memAnecdote').value = mem.anecdote || '';
+    titleEl.textContent = 'Modifier le souvenir';
+    _memCurrentMood = mem.humeur || '';
+    if (_memCurrentMood) {
+      const moodBtn = document.querySelector(`.mem-mood[data-mood="${_memCurrentMood}"]`);
+      if (moodBtn) moodBtn.classList.add('selected');
+    }
+    // Load existing photos as pending (already uploaded)
+    _memPendingPhotos = (mem.photos||[]).map(p => ({
+      file: null, previewUrl: p.url, existingUrl: p.url, existingPath: p.path
+    }));
+    _renderPhotosPreviews();
+  } else {
+    titleEl.textContent = prefill.questId ? '🏆 Souvenir lié à la quête' : '📸 Nouveau moment de vie';
+    if (prefill.questName) {
+      document.getElementById('memTitle').value = prefill.questName;
+    }
+  }
+
+  // Mood button handlers
+  document.querySelectorAll('.mem-mood').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.mem-mood').forEach(b => b.classList.remove('selected'));
+      if (_memCurrentMood === btn.dataset.mood) {
+        _memCurrentMood = ''; // deselect on double-click
+      } else {
+        _memCurrentMood = btn.dataset.mood;
+        btn.classList.add('selected');
+      }
+    };
+  });
+
+  backdrop.style.display = 'flex';
+  setTimeout(() => document.getElementById('memTitle').focus(), 100);
+}
+
+function closeMemoryModal(event) {
+  if (event && event.target !== document.getElementById('memModalBackdrop')) return;
+  _memPendingPhotos = [];
+  document.getElementById('memModalBackdrop').style.display = 'none';
+}
+
+// ─────────────────────────────────────────
+// PHOTO HANDLING IN MODAL
+// ─────────────────────────────────────────
+function _renderPhotosPreviews() {
+  const container = document.getElementById('memPhotosPreview');
+  const addBtn    = document.getElementById('memPhotoAddBtn');
+  container.innerHTML = '';
+  _memPendingPhotos.forEach((p, i) => {
+    const div = document.createElement('div');
+    div.className = 'mem-photo-thumb';
+    div.innerHTML = `<img src="${p.previewUrl}" alt=""><button class="mem-photo-remove" onclick="_removePendingPhoto(${i})">✕</button>`;
+    container.appendChild(div);
+  });
+  if (addBtn) addBtn.disabled = _memPendingPhotos.length >= MEM_MAX_PHOTOS;
+}
+
+function _removePendingPhoto(index) {
+  const p = _memPendingPhotos[index];
+  if (p && p.previewUrl && !p.existingUrl) URL.revokeObjectURL(p.previewUrl);
+  _memPendingPhotos.splice(index, 1);
+  _renderPhotosPreviews();
+}
+
+async function handlePhotoSelect(event) {
+  const files = Array.from(event.target.files || []);
+  event.target.value = '';
+  const available = MEM_MAX_PHOTOS - _memPendingPhotos.length;
+  if (available <= 0) return;
+  const toProcess = files.slice(0, available);
+  const statusEl = document.getElementById('memPhotoStatus');
+  statusEl.textContent = 'Traitement des images...';
+  statusEl.className = 'mem-photo-status uploading';
+
+  for (const file of toProcess) {
+    try {
+      const resized = await _resizeImage(file);
+      const previewUrl = URL.createObjectURL(resized);
+      _memPendingPhotos.push({file: resized, previewUrl});
+    } catch(e) {
+      console.warn('Could not process image:', e);
+    }
+  }
+  _renderPhotosPreviews();
+  statusEl.textContent = _memPendingPhotos.length > 0 ? `${_memPendingPhotos.length} photo(s) prête(s)` : '';
+  statusEl.className = 'mem-photo-status';
+}
+
+// ─────────────────────────────────────────
+// SAVE MEMORY
+// ─────────────────────────────────────────
+async function saveMemory() {
+  const saveBtn = document.getElementById('memSaveBtn');
+  const statusEl = document.getElementById('memPhotoStatus');
+  const title = document.getElementById('memTitle').value.trim();
+  if (!title) { document.getElementById('memTitle').focus(); return; }
+
+  saveBtn.disabled = true;
+  saveBtn.textContent = '⏳ Enregistrement...';
+
+  const memId = document.getElementById('memId').value || _memId();
+  const isEdit = !!document.getElementById('memId').value;
+
+  try {
+    // Upload new photos to Supabase Storage
+    const finalPhotos = [];
+    const newPhotos = _memPendingPhotos.filter(p => p.file); // truly new
+    const existingPhotos = _memPendingPhotos.filter(p => !p.file); // kept existing
+
+    // Keep existing photos that were not removed
+    existingPhotos.forEach(p => finalPhotos.push({path: p.existingPath, url: p.existingUrl}));
+
+    // Upload new ones
+    if (newPhotos.length > 0) {
+      statusEl.textContent = `Upload ${newPhotos.length} photo(s)...`;
+      statusEl.className = 'mem-photo-status uploading';
+      for (const p of newPhotos) {
+        const ref = await _uploadPhoto(p.file, memId);
+        finalPhotos.push(ref);
+        URL.revokeObjectURL(p.previewUrl);
+      }
+      statusEl.textContent = '✓ Photos uploadées';
+      statusEl.className = 'mem-photo-status ok';
+    }
+
+    // If editing, delete photos that were removed
+    if (isEdit) {
+      const existingMem = (S.memories||[]).find(m => m.id === memId);
+      if (existingMem) {
+        const removedPaths = (existingMem.photos||[])
+          .map(p => p.path)
+          .filter(path => !existingPhotos.some(ep => ep.existingPath === path));
+        for (const path of removedPaths) await _deletePhoto(path);
+      }
+    }
+
+    const now = new Date().toISOString();
+    const memory = {
+      id: memId,
+      type: document.getElementById('memType').value || 'free',
+      questId: document.getElementById('memQuestId').value || null,
+      title,
+      date: document.getElementById('memDate').value || now.slice(0,10),
+      lieu: document.getElementById('memLieu').value.trim() || null,
+      humeur: _memCurrentMood || null,
+      anecdote: document.getElementById('memAnecdote').value.trim() || null,
+      photos: finalPhotos,
+      createdAt: isEdit ? ((S.memories||[]).find(m=>m.id===memId)?.createdAt || now) : now,
+      updatedAt: now,
+    };
+
+    if (!S.memories) S.memories = [];
+    if (isEdit) {
+      const idx = S.memories.findIndex(m => m.id === memId);
+      if (idx >= 0) S.memories[idx] = memory; else S.memories.unshift(memory);
+    } else {
+      S.memories.unshift(memory);
+    }
+
+    save();
+    _refreshMemBadge();
+    document.getElementById('memModalBackdrop').style.display = 'none';
+    if (document.getElementById('s-memories')?.classList.contains('active')) renderMemories();
+    addLog(`Souvenir ${isEdit?'modifié':'ajouté'} : <span class="hi">${title}</span>`);
+
+    saveBtn.disabled = false;
+    saveBtn.textContent = '💾 Enregistrer';
+  } catch(err) {
+    console.error('saveMemory error:', err);
+    statusEl.textContent = '✗ Erreur : ' + (err.message || 'upload échoué');
+    statusEl.className = 'mem-photo-status err';
+    saveBtn.disabled = false;
+    saveBtn.textContent = '💾 Réessayer';
+  }
+}
+
+// ─────────────────────────────────────────
+// DELETE MEMORY
+// ─────────────────────────────────────────
+async function deleteMemory(memId) {
+  const mem = (S.memories||[]).find(m => m.id === memId);
+  if (!mem) return;
+  if (!confirm(`Supprimer le souvenir "${mem.title}" ? Les photos associées seront également supprimées.`)) return;
+  // Delete photos from storage
+  for (const p of (mem.photos||[])) await _deletePhoto(p.path);
+  S.memories = (S.memories||[]).filter(m => m.id !== memId);
+  save();
+  _refreshMemBadge();
+  renderMemories();
+  addLog(`Souvenir supprimé : <span class="hi">${mem.title}</span>`);
+}
+
+// ─────────────────────────────────────────
+// QUEST-LINKED OFFER (non-blocking toast)
+// ─────────────────────────────────────────
+function offerMemoryForQuest(quest) {
+  // Don't offer if already has a memory for this quest
+  if ((S.memories||[]).some(m => m.questId === quest.id)) return;
+
+  document.querySelectorAll('.mem-quest-offer').forEach(el => el.remove());
+
+  const div = document.createElement('div');
+  div.className = 'mem-quest-offer';
+  div.innerHTML = `
+    <div class="mem-quest-offer-text">📸 Ajouter un souvenir à cette quête ?</div>
+    <div class="mem-quest-offer-btns">
+      <button class="mem-quest-offer-yes" onclick="_acceptQuestOffer('${quest.id}','${quest.name.replace(/'/g,"\'").replace(/"/g,'&quot;')}',this.closest('.mem-quest-offer'))">Oui</button>
+      <button class="mem-quest-offer-no" onclick="this.closest('.mem-quest-offer').remove()">Non</button>
+    </div>`;
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 8000);
+}
+
+function _acceptQuestOffer(questId, questName, offerEl) {
+  if (offerEl) offerEl.remove();
+  openMemoryModal(null, {type:'quest', questId, questName});
 }
 
 /* ═══════════════════════════════════════════════════
@@ -1888,6 +2510,7 @@ function go(id){
   if(id==='bosses')renderBosses();
   if(id==='explorer'){renderBiomes();renderFilterBar('explorer','explorerFilter');}
   if(id==='legends')renderLegends();
+  if(id==='memories'){renderMemories();}
   if(id==='wishlist'){renderWishlist();refreshWishBadge();}
   if(id==='dashboard'){refreshDashboard();refreshContrat();}
   if(id==='saveload'){buildExportStats();}
@@ -1988,7 +2611,7 @@ async function init() {
 /* ═══════════════════════════════════════════════════
    PWA VERSION
 ═══════════════════════════════════════════════════ */
-const APP_VERSION = '1.2.0';
+const APP_VERSION = '1.3.0';
 
 // Stamp the version in the sidebar as soon as JS runs
 (function stampVersion() {
@@ -2115,6 +2738,7 @@ function _applyRemoteState(remote) {
   S.contrat  = remote.contrat  || {};
   S.destin   = remote.destin   || {};
   S.legends  = remote.legends  || [];
+  S.memories = remote.memories || [];
   S.log      = remote.log      || [];
 
   _cloudSaving = true;
