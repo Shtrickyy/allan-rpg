@@ -2622,11 +2622,23 @@ const APP_VERSION = '1.3.0';
 // Called by the update button — skips waiting SW then reloads
 // localStorage and Supabase data are NOT touched
 function applyUpdate() {
+  const btn = document.querySelector('.update-btn');
+  if (btn) { btn.textContent = '⏳ Mise à jour...'; btn.disabled = true; }
+
   if (_swWaitingWorker) {
+    // Ask the waiting SW to skip waiting and become the active SW.
+    // The 'controllerchange' event (wired above) will then reload the page.
     _swWaitingWorker.postMessage({ type: 'SKIP_WAITING' });
-    // Page will reload on 'controllerchange' event (wired in SW registration)
+
+    // Safety timeout: if controllerchange doesn't fire within 4s, force reload.
+    // This handles edge cases where the message wasn't received.
+    setTimeout(() => {
+      console.warn('[Allan RPG] controllerchange did not fire — forcing reload.');
+      window.location.reload();
+    }, 4000);
   } else {
-    // Fallback: hard reload if we lost the reference
+    // No waiting SW reference (e.g. banner shown from a previous session).
+    // Force a hard reload which will re-register and pick up the latest SW.
     window.location.reload();
   }
 }
@@ -2793,62 +2805,88 @@ async function loadFromCloud() {
 
 init();
 
-// ── Service Worker registration + update detection ──
-// Holds reference to the waiting (new) SW so applyUpdate() can activate it
+/* ─────────────────────────────────────────────────
+   SERVICE WORKER — registration + update detection
+   v1.3.0
+
+   NEVER deletes localStorage or Supabase data.
+   Only cache storage is versioned and rotated.
+───────────────────────────────────────────────── */
+
+// Reference to the new SW waiting to be activated
 let _swWaitingWorker = null;
 
+// Show the update banner and keep a reference to the waiting SW
 function _showUpdateBanner(worker) {
   _swWaitingWorker = worker;
   const banner = document.getElementById('updateBanner');
   if (banner) banner.classList.add('visible');
-  console.log('[Allan RPG] Update available — banner shown');
+  console.log('[Allan RPG] New version available — banner shown.');
 }
 
-// Environments where the SW files don't exist — skip silently
+// Environments where the SW file does not exist — skip silently
 const _swUnsupportedHosts = ['claudeusercontent.com', 'localhost', '127.0.0.1'];
 const _swEnabled = 'serviceWorker' in navigator &&
   !_swUnsupportedHosts.some(h => location.hostname.includes(h));
 
 if (_swEnabled) {
   window.addEventListener('load', () => {
+
+    // ── controllerchange: fires after skipWaiting() activates the new SW ──
+    // Reload immediately so the user gets the new version.
+    // localStorage and Supabase data are untouched — only the app shell changes.
+    let _reloading = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!_reloading) {
+        _reloading = true;
+        console.log('[Allan RPG] New SW in control — reloading.');
+        window.location.reload();
+      }
+    });
+
     navigator.serviceWorker
       .register('/allan-rpg/service-worker.js', { scope: '/allan-rpg/' })
       .then(reg => {
         console.log('[Allan RPG] SW registered:', reg.scope);
 
-        // Case 1 — A new SW is already waiting (user had old page open)
+        // ── Case 1: a SW is already waiting on first load ──
+        // (user refreshed while a previous update was pending)
         if (reg.waiting) {
+          console.log('[Allan RPG] Case 1 — SW already waiting.');
           _showUpdateBanner(reg.waiting);
         }
 
-        // Case 2 — A new SW starts installing while the page is open
+        // ── Case 2: a new SW starts installing while the page is open ──
         reg.addEventListener('updatefound', () => {
-          const newWorker = reg.installing;
-          if (!newWorker) return;
-          newWorker.addEventListener('statechange', () => {
-            // New SW installed and waiting — safe to activate
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              _showUpdateBanner(newWorker);
+          const installing = reg.installing;
+          if (!installing) return;
+          console.log('[Allan RPG] Case 2 — new SW installing.');
+
+          installing.addEventListener('statechange', () => {
+            console.log('[Allan RPG] SW state:', installing.state);
+            if (installing.state === 'installed') {
+              if (navigator.serviceWorker.controller) {
+                // There is an existing active SW → this update is for the user
+                _showUpdateBanner(installing);
+              } else {
+                // First install — no existing controller, skip straight through
+                console.log('[Allan RPG] First install — no update needed.');
+              }
             }
           });
         });
 
-        // Poll for updates every 60 minutes (background check)
-        setInterval(() => reg.update().catch(() => {}), 60 * 60 * 1000);
+        // ── Poll every 5 minutes for new versions in the background ──
+        // (ensures mobile apps pick up updates even without a full reload)
+        setInterval(() => {
+          reg.update().catch(() => {});
+        }, 5 * 60 * 1000);
+
       })
       .catch(err => {
+        // 404 on dev environments is expected and already filtered above
         console.warn('[Allan RPG] SW registration failed:', err);
       });
-
-    // Case 3 — SW controller changes (applyUpdate() sent SKIP_WAITING)
-    // Reload the page to activate the new SW — data is untouched
-    let refreshing = false;
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (!refreshing) {
-        refreshing = true;
-        window.location.reload();
-      }
-    });
   });
 } // end if (_swEnabled)
 </script>

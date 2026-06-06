@@ -1,82 +1,144 @@
-/* ═══════════════════════════════════════════════
-   Allan RPG — Service Worker
-   Cache-first strategy for offline play
-═══════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════
+   Allan RPG — Service Worker  v1.3.0
+   
+   STRATEGY: network-first for navigation (always fresh HTML),
+             cache-first for assets (fonts, icons, manifest).
+   
+   VERSIONING: CACHE_NAME must be updated on every deploy.
+   The activate handler deletes all other caches automatically.
+   localStorage and Supabase data are NEVER touched.
+═══════════════════════════════════════════════════ */
 
-const CACHE_NAME = 'allan-rpg-v1.2.0';
+const APP_VERSION = '1.3.0';
+const CACHE_NAME  = 'allan-rpg-' + APP_VERSION;
 
-// Files to pre-cache on install
-const PRECACHE_URLS = [
-  '/allan-rpg/',
-  '/allan-rpg/index.html',
+// Assets that are safe to cache aggressively (change rarely)
+const PRECACHE_ASSETS = [
   '/allan-rpg/manifest.json',
   '/allan-rpg/icon-192.png',
   '/allan-rpg/icon-512.png',
   '/allan-rpg/icon-maskable-512.png',
 ];
 
+// External hosts that must NEVER be intercepted
+const PASSTHROUGH_HOSTS = [
+  'supabase.co',
+  'googleapis.com',
+  'jsdelivr.net',
+  'fonts.gstatic.com',
+];
 
-// ── SKIP_WAITING: called by applyUpdate() in the page ──
-// Activates this SW immediately without waiting for old tabs to close.
-// Does NOT touch localStorage or any cached data.
+/* ─────────────────────────────────────────────────
+   INSTALL
+   Pre-cache static assets. Do NOT call skipWaiting()
+   here — we wait for the user to click "Mettre à jour"
+   so the active page is never disrupted mid-session.
+───────────────────────────────────────────────── */
+self.addEventListener('install', event => {
+  console.log('[SW] Installing', CACHE_NAME);
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(PRECACHE_ASSETS))
+      .then(() => {
+        console.log('[SW] Pre-cache complete. Waiting for activation signal.');
+        // DO NOT call self.skipWaiting() here.
+        // The new SW sits in "waiting" state until applyUpdate() triggers SKIP_WAITING.
+      })
+  );
+});
+
+/* ─────────────────────────────────────────────────
+   ACTIVATE
+   Delete every cache that is not the current version.
+   Then claim all clients so the new SW takes effect.
+   localStorage and Supabase data are untouched.
+───────────────────────────────────────────────── */
+self.addEventListener('activate', event => {
+  console.log('[SW] Activating', CACHE_NAME);
+  event.waitUntil(
+    caches.keys()
+      .then(keys => {
+        const toDelete = keys.filter(k => k !== CACHE_NAME);
+        if (toDelete.length) {
+          console.log('[SW] Deleting old caches:', toDelete);
+        }
+        return Promise.all(toDelete.map(k => caches.delete(k)));
+      })
+      .then(() => {
+        console.log('[SW] Old caches cleared. Claiming clients.');
+        return self.clients.claim();
+      })
+  );
+});
+
+/* ─────────────────────────────────────────────────
+   MESSAGE — SKIP_WAITING
+   Sent by applyUpdate() in the page when the user
+   clicks "Mettre à jour". Immediately activates
+   this SW; controllerchange fires → page reloads.
+───────────────────────────────────────────────── */
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('[SW] SKIP_WAITING received — activating now.');
     self.skipWaiting();
   }
 });
-// ── Install: pre-cache shell ──────────────────
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(PRECACHE_URLS);
-    }).then(() => self.skipWaiting())
-  );
-});
 
-// ── Activate: clean old caches ────────────────
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
-      )
-    ).then(() => self.clients.claim())
-  );
-});
-
-// ── Fetch: cache-first, fallback to network ───
+/* ─────────────────────────────────────────────────
+   FETCH
+   
+   Navigation requests (index.html):
+     → Network-first, fall back to cache.
+     → Ensures users always get the latest HTML on load.
+   
+   Static assets (icons, manifest):
+     → Cache-first, update cache in background.
+   
+   External (Supabase, CDNs, fonts):
+     → Always pass through — never intercept.
+───────────────────────────────────────────────── */
 self.addEventListener('fetch', event => {
-  // Only handle GET requests
   if (event.request.method !== 'GET') return;
 
-  // Pass through Supabase API calls — always network
   const url = new URL(event.request.url);
-  if (url.hostname.includes('supabase.co') ||
-      url.hostname.includes('googleapis.com') ||
-      url.hostname.includes('jsdelivr.net')) {
-    return; // let browser handle normally
+
+  // Never intercept external / API requests
+  if (PASSTHROUGH_HOSTS.some(h => url.hostname.includes(h))) return;
+
+  // Navigation (HTML pages) — network first so updates are always visible
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          // Cache the fresh HTML response
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => {
+          // Offline: serve the cached index
+          return caches.match('/allan-rpg/index.html')
+            || caches.match('/allan-rpg/');
+        })
+    );
+    return;
   }
 
+  // Static assets — cache first, background refresh
   event.respondWith(
     caches.match(event.request).then(cached => {
-      if (cached) return cached;
-
-      return fetch(event.request).then(response => {
-        // Only cache valid same-origin or CORS-safe responses
-        if (!response || response.status !== 200 || response.type === 'error') {
-          return response;
+      const networkFetch = fetch(event.request).then(response => {
+        if (response && response.status === 200 && response.type !== 'error') {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         }
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         return response;
-      }).catch(() => {
-        // Offline fallback: serve index for navigation requests
-        if (event.request.mode === 'navigate') {
-          return caches.match('/allan-rpg/index.html');
-        }
-      });
+      }).catch(() => null);
+
+      // Return cache immediately if available, but refresh in background
+      return cached || networkFetch;
     })
   );
 });
