@@ -2,8 +2,21 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Allan Dufas · Open World RPG</title>
+
+<!-- ── PWA ── -->
+<link rel="manifest" href="/allan-rpg/manifest.json">
+<meta name="theme-color" content="#FF9F1C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Allan RPG">
+<link rel="apple-touch-icon" href="/allan-rpg/icon-512.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/allan-rpg/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/allan-rpg/icon-512.png">
+<meta name="description" content="Le RPG de ta vraie vie. Quêtes, guildes, légendes et mission du destin.">
+<meta name="application-name" content="Allan RPG">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -357,7 +370,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 <div class="panel active" id="s-dashboard">
   <div class="hero">
     <div class="stag" style="background:rgba(255,159,28,.1);color:var(--sun);">🌅 Saison 31</div>
-    <div class="stitle">Le Monde est plus grand<br>que Paris.</div>
+    <div class="stitle">Le Monde est plus grand<br>que Cachan.</div>
     <div class="sdesc">Du temps. Des économies. De la liberté. Aucune idée de la suite. Un terrain de jeu parfait. 🚀</div>
   </div>
 
@@ -1931,6 +1944,20 @@ async function loadFromCloud() {
 }
 
 init();
+
+// ── Service Worker registration ──────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/allan-rpg/service-worker.js', { scope: '/allan-rpg/' })
+      .then(reg => {
+        console.log('[Allan RPG] SW registered:', reg.scope);
+      })
+      .catch(err => {
+        console.warn('[Allan RPG] SW registration failed:', err);
+      });
+  });
+}
 </script>
 </body>
 </html>
