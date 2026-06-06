@@ -310,6 +310,22 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .sl-feedback.ok{background:rgba(6,214,160,.1);border:1px solid rgba(6,214,160,.25);color:var(--ocean);display:block;}
 .sl-feedback.err{background:rgba(239,71,111,.1);border:1px solid rgba(239,71,111,.25);color:var(--coral-l);display:block;}
 
+/* SYNC STATUS PILL */
+.sync-pill{display:inline-flex;align-items:center;gap:5px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.5px;padding:3px 9px;border-radius:10px;margin-top:8px;transition:all .4s ease;border:1px solid transparent;line-height:1.4;opacity:.85;}
+.sync-pill .sp-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+/* states */
+.sync-pill.sp-idle{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.07);color:var(--text-dim);}
+.sync-pill.sp-idle .sp-dot{background:var(--text-dim);}
+.sync-pill.sp-saving{background:rgba(244,196,48,.08);border-color:rgba(244,196,48,.2);color:var(--gold);}
+.sync-pill.sp-saving .sp-dot{background:var(--gold);animation:sp-pulse .8s ease-in-out infinite alternate;}
+.sync-pill.sp-syncing{background:rgba(155,93,229,.1);border-color:rgba(155,93,229,.2);color:var(--lav-l);}
+.sync-pill.sp-syncing .sp-dot{background:var(--lav-l);animation:sp-pulse .6s ease-in-out infinite alternate;}
+.sync-pill.sp-ok{background:rgba(6,214,160,.08);border-color:rgba(6,214,160,.2);color:var(--ocean);}
+.sync-pill.sp-ok .sp-dot{background:var(--ocean);}
+.sync-pill.sp-err{background:rgba(239,71,111,.08);border-color:rgba(239,71,111,.2);color:var(--coral-l);}
+.sync-pill.sp-err .sp-dot{background:var(--coral-l);}
+@keyframes sp-pulse{from{opacity:.3}to{opacity:1}}
+
 /* Responsive */
 @media(max-width:768px){.shell{grid-template-columns:1fr;}.sidebar{position:relative;height:auto;}.main{height:auto;}.panel{padding:22px 16px;}.stats-grid{grid-template-columns:repeat(2,1fr);}}
 </style>
@@ -329,6 +345,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       <div class="xp-nums"><span><span id="xpE">0</span> XP</span><span>/ <span id="xpT">0</span></span></div>
       <div class="xp-out"><div class="xp-in" id="xpBar" style="width:0%"></div></div>
     </div>
+    <div class="sync-pill sp-idle" id="syncPillSidebar">
+      <div class="sp-dot"></div><span id="syncPillSidebarText">Local</span>
+    </div>
   </div>
 
   <div class="ng">
@@ -341,7 +360,6 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     <button class="ni" onclick="go('humans')"><span class="ni-ico">🍻</span>Guilde des Humains<span class="nbadge" id="nb-humans">0/0</span></button>
     <button class="ni" onclick="go('improv')"><span class="ni-ico">🎭</span>Guilde Improvisation<span class="nbadge" id="nb-improv">0/0</span></button>
     <button class="ni" onclick="go('creators')"><span class="ni-ico">🎨</span>Guilde des Créateurs<span class="nbadge" id="nb-creators">0/0</span></button>
-    <button class="ni" onclick="go('artists')"><span class="ni-ico">📸</span>Guilde des Artistes<span class="nbadge" id="nb-artists">0/0</span></button>
     <button class="ni" onclick="go('explorer')"><span class="ni-ico">🌴</span>Guilde Explorateur<span class="nbadge" id="nb-explorer">0/0</span></button>
     <button class="ni" onclick="go('warrior')"><span class="ni-ico">⚔️</span>Guilde Guerrier<span class="nbadge" id="nb-warrior">0/0</span></button>
     <button class="ni" onclick="go('charisma')"><span class="ni-ico">💃</span>DLC Charisme<span class="nbadge" id="nb-charisma">0/0</span></button>
@@ -583,6 +601,14 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     <input type="file" id="importFileInput" accept=".json,application/json" style="display:none" onchange="handleImport(event)">
     <button class="sl-btn sl-btn-import" onclick="document.getElementById('importFileInput').click()">📥 Choisir un fichier JSON</button>
     <div class="sl-feedback" id="importFeedback"></div>
+  </div>
+
+  <!-- SYNC STATUS -->
+  <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);margin-bottom:14px;">
+    <span style="font-size:13px;color:var(--text-dim);">Statut sync automatique</span>
+    <div class="sync-pill sp-idle" id="syncPillSaveload" style="margin-top:0">
+      <div class="sp-dot"></div><span id="syncPillSaveloadText">Local</span>
+    </div>
   </div>
 
   <!-- CLOUD SAVE -->
@@ -1032,7 +1058,11 @@ let S={
 };
 
 function load(){try{const r=localStorage.getItem('allanrpg_v4');if(r){S=JSON.parse(r);if(!S.wish)S.wish={};}}catch(e){}}
-function save(){localStorage.setItem('allanrpg_v4',JSON.stringify(S));}
+function save(){
+  localStorage.setItem('allanrpg_v4', JSON.stringify(S));
+  // Trigger debounced cloud sync — only if NOT already inside saveToCloud
+  if (!_cloudSaving) scheduleCloudSave();
+}
 
 /* ═══════════════════════════════════════════════════
    HELPERS
@@ -1859,13 +1889,63 @@ const SUPABASE_KEY = 'sb_publishable_QzLrQ6xvyg_pEOi72gsytg_FZnCDxys';
 const SAVE_ID      = 'allandufas';
 const SAVE_TABLE   = 'saves';
 
+/* ═══════════════════════════════════════════════════
+   AUTO CLOUD SAVE — debounced, non-blocking
+═══════════════════════════════════════════════════ */
+
+// Anti-loop guard: true while saveToCloud() is running
+let _cloudSaving = false;
+
+// Debounce timer handle
+let _cloudTimer = null;
+
+// ── setSyncStatus: update both sync pills everywhere ──
+function setSyncStatus(state, timestamp) {
+  const STATES = {
+    idle:    { cls:'sp-idle',    text:'Local' },
+    saving:  { cls:'sp-saving',  text:'Sauvegarde locale...' },
+    syncing: { cls:'sp-syncing', text:'Synchronisation...' },
+    ok:      { cls:'sp-ok',      text: timestamp ? '☁ Sync ' + timestamp : '☁ Synchronisé' },
+    err:     { cls:'sp-err',     text:'⚠ Erreur cloud' },
+  };
+  const s = STATES[state] || STATES.idle;
+  const pills = ['syncPillSidebar', 'syncPillSaveload'];
+  const texts = ['syncPillSidebarText', 'syncPillSaveloadText'];
+  pills.forEach((id, i) => {
+    const pill = document.getElementById(id);
+    const txt  = document.getElementById(texts[i]);
+    if (!pill || !txt) return;
+    pill.className = 'sync-pill ' + s.cls;
+    if (id === 'syncPillSidebar') pill.style.marginTop = '8px'; // keep inline style
+    txt.textContent = s.text;
+  });
+}
+
+// ── scheduleCloudSave: debounced 3s, non-blocking ──
+function scheduleCloudSave() {
+  // Show "saving locally" feedback immediately
+  setSyncStatus('saving');
+  clearTimeout(_cloudTimer);
+  _cloudTimer = setTimeout(() => {
+    // Fire and forget — never awaited, never blocks UI
+    saveToCloud({ auto: true }).catch(err => {
+      console.warn('[Allan RPG] Auto cloud save failed silently:', err);
+    });
+  }, 3000);
+}
+
 // Init client (supabase-js v2 UMD exposes window.supabase)
 const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-async function saveToCloud() {
+async function saveToCloud({ auto = false } = {}) {
   const statusEl = document.getElementById('cloudSaveStatus');
-  statusEl.textContent = '⏳ Sauvegarde en cours...';
-  statusEl.className = 'sl-cloud-status loading';
+  // Update pills
+  setSyncStatus('syncing');
+  if (!auto) {
+    statusEl.textContent = '⏳ Sauvegarde en cours...';
+    statusEl.className = 'sl-cloud-status loading';
+  }
+  _cloudSaving = true; // prevent save() → scheduleCloudSave() loop
   try {
     const payload = {
       id: SAVE_ID,
@@ -1876,12 +1956,22 @@ async function saveToCloud() {
       .from(SAVE_TABLE)
       .upsert(payload, { onConflict: 'id' });
     if (error) throw error;
-    statusEl.textContent = '✓ Sauvegarde cloud réussie — ' + new Date().toLocaleTimeString('fr-FR');
-    statusEl.className = 'sl-cloud-status ok';
+    const ts = new Date().toLocaleTimeString('fr-FR');
+    setSyncStatus('ok', ts);
+    if (!auto) {
+      statusEl.textContent = '✓ Sauvegarde cloud réussie — ' + ts;
+      statusEl.className = 'sl-cloud-status ok';
+    }
   } catch (err) {
     console.error('saveToCloud error:', err);
-    statusEl.textContent = '✗ Erreur : ' + (err.message || 'impossible de joindre Supabase');
-    statusEl.className = 'sl-cloud-status err';
+    const msg = err.message || 'impossible de joindre Supabase';
+    setSyncStatus('err');
+    if (!auto) {
+      statusEl.textContent = '✗ Erreur : ' + msg;
+      statusEl.className = 'sl-cloud-status err';
+    }
+  } finally {
+    _cloudSaving = false;
   }
 }
 
@@ -1916,8 +2006,10 @@ async function loadFromCloud() {
     S.legends   = remote.legends   || [];
     S.log       = remote.log       || [];
 
-    // Persist locally then re-render everything
+    // Persist locally — set flag so save() doesn't schedule a cloud sync
+    _cloudSaving = true;
     save();
+    _cloudSaving = false;
     refreshXP();
     refreshBadges();
     refreshDashboard();
