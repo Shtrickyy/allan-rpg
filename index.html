@@ -437,7 +437,55 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .mem-quest-offer-no{padding:7px 10px;border-radius:var(--rs);border:1px solid var(--border2);background:transparent;color:var(--text-dim);font-family:'Space Mono',monospace;font-size:11px;cursor:pointer;}
 
 /* Responsive */
-@media(max-width:768px){.shell{grid-template-columns:1fr;}.sidebar{position:relative;height:auto;}.main{height:auto;}.panel{padding:22px 16px;}.stats-grid{grid-template-columns:repeat(2,1fr);}}
+/* ═══════════════════════════════════════════════════
+   MOBILE — accordéon sidebar
+   Le panel actif est déplacé dans la sidebar,
+   sous le bouton cliqué. .main est masqué.
+═══════════════════════════════════════════════════ */
+@media(max-width:768px){
+  /* Layout : colonne unique */
+  .shell{grid-template-columns:1fr;}
+  .sidebar{position:relative;height:auto;overflow-y:visible;}
+  /* Le main reste dans le DOM mais est masqué sur mobile —
+     son contenu est déplacé dans .mob-drawer */
+  .main{display:none!important;}
+  /* Stats */
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  /* Nav buttons : légèrement plus grands pour les doigts */
+  .ni{padding:11px 12px;font-size:14px;}
+  /* Drawer : zone qui s'ouvre sous le bouton cliqué */
+  .mob-drawer{
+    overflow:hidden;
+    max-height:0;
+    transition:max-height .35s cubic-bezier(.4,0,.2,1);
+    background:var(--bg2);
+    border-left:3px solid rgba(255,159,28,.25);
+    margin:0 10px 4px 10px;
+    border-radius:0 0 var(--rs) var(--rs);
+  }
+  .mob-drawer.open{max-height:99999px;} /* large enough for any content */
+  /* Panel quand il est à l'intérieur du drawer */
+  .mob-drawer .panel{
+    display:block!important;
+    padding:20px 14px 28px;
+  }
+  /* Chevron sur les boutons nav */
+  .ni .ni-chev{
+    margin-left:auto;
+    font-size:11px;
+    color:var(--text-dim);
+    transition:transform .25s;
+    flex-shrink:0;
+  }
+  .ni.active .ni-chev{transform:rotate(180deg);color:var(--sun);}
+  /* Bouton moment de vie — masqué en mobile
+     (accessible via les boutons inline dans les panels) */
+}
+/* Desktop : drawers jamais visibles */
+@media(min-width:769px){
+  .mob-drawer{display:none!important;}
+  .ni .ni-chev{display:none;}
+}
 </style>
 </head>
 <body>
@@ -481,33 +529,51 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 
   <div class="ng">
     <div class="ng-lbl">Monde</div>
-    <button class="ni active" onclick="go('dashboard')"><span class="ni-ico">🗺️</span>Tableau de bord</button>
-    <button class="ni" onclick="go('mq')"><span class="ni-ico">🌍</span>Quête Principale<span class="nbadge" id="nb-mq">0/0</span></button>
+    <button class="ni active" onclick="go('dashboard')"><span class="ni-ico">🗺️</span>Tableau de bord<span class="ni-chev">▾</span></button>
+    <div class="mob-drawer" id="mob-dashboard"></div>
+    <button class="ni" onclick="go('mq')"><span class="ni-ico">🌍</span>Quête Principale<span class="nbadge" id="nb-mq">0/0</span><span class="ni-chev">▾</span></button>
+    <div class="mob-drawer" id="mob-mq"></div>
   </div>
   <div class="ng">
     <div class="ng-lbl">Guildes</div>
-    <button class="ni" onclick="go('humans')"><span class="ni-ico">🍻</span>Guilde des Humains<span class="nbadge" id="nb-humans">0/0</span></button>
-    <button class="ni" onclick="go('improv')"><span class="ni-ico">🎭</span>Guilde Improvisation<span class="nbadge" id="nb-improv">0/0</span></button>
-    <button class="ni" onclick="go('creators')"><span class="ni-ico">🎨</span>Guilde des Créateurs<span class="nbadge" id="nb-creators">0/0</span></button>
-    <button class="ni" onclick="go('explorer')"><span class="ni-ico">🌴</span>Guilde Explorateur<span class="nbadge" id="nb-explorer">0/0</span></button>
-    <button class="ni" onclick="go('warrior')"><span class="ni-ico">⚔️</span>Guilde Guerrier<span class="nbadge" id="nb-warrior">0/0</span></button>
-    <button class="ni" onclick="go('charisma')"><span class="ni-ico">💃</span>DLC Charisme<span class="nbadge" id="nb-charisma">0/0</span></button>
-    <button class="ni" onclick="go('sage')"><span class="ni-ico">📚</span>Le Sage<span class="nbadge" id="nb-sage">0/0</span></button>
+    <button class="ni" onclick="go('humans')"><span class="ni-ico">🍻</span>Guilde des Humains<span class="nbadge" id="nb-humans">0/0</span><span class="ni-chev">▾</span></button>
+    <div class="mob-drawer" id="mob-humans"></div>
+    <button class="ni" onclick="go('improv')"><span class="ni-ico">🎭</span>Guilde Improvisation<span class="nbadge" id="nb-improv">0/0</span><span class="ni-chev">▾</span></button>
+    <div class="mob-drawer" id="mob-improv"></div>
+    <button class="ni" onclick="go('creators')"><span class="ni-ico">🎨</span>Guilde des Créateurs<span class="nbadge" id="nb-creators">0/0</span><span class="ni-chev">▾</span></button>
+    <div class="mob-drawer" id="mob-creators"></div>
+    <button class="ni" onclick="go('explorer')"><span class="ni-ico">🌴</span>Guilde Explorateur<span class="nbadge" id="nb-explorer">0/0</span><span class="ni-chev">▾</span></button>
+    <div class="mob-drawer" id="mob-explorer"></div>
+    <button class="ni" onclick="go('warrior')"><span class="ni-ico">⚔️</span>Guilde Guerrier<span class="nbadge" id="nb-warrior">0/0</span><span class="ni-chev">▾</span></button>
+    <div class="mob-drawer" id="mob-warrior"></div>
+    <button class="ni" onclick="go('charisma')"><span class="ni-ico">💃</span>DLC Charisme<span class="nbadge" id="nb-charisma">0/0</span><span class="ni-chev">▾</span></button>
+    <div class="mob-drawer" id="mob-charisma"></div>
+    <button class="ni" onclick="go('sage')"><span class="ni-ico">📚</span>Le Sage<span class="nbadge" id="nb-sage">0/0</span><span class="ni-chev">▾</span></button>
+    <div class="mob-drawer" id="mob-sage"></div>
   </div>
   <div class="ng">
     <div class="ng-lbl">Extras</div>
-    <button class="ni" onclick="go('absurd')"><span class="ni-ico">🎲</span>Quêtes absurdes<span class="nbadge" id="nb-absurd">0/0</span></button>
-    <button class="ni" onclick="go('legendary')"><span class="ni-ico">🔥</span>Légendaires<span class="nbadge" id="nb-legendary">0/0</span></button>
-    <button class="ni" onclick="go('collectibles')"><span class="ni-ico">💎</span>Collectibles<span class="nbadge" id="nb-collect">0/0</span></button>
-    <button class="ni" onclick="go('wishlist')"><span class="ni-ico">⭐</span>Mes Favoris<span class="nbadge" id="nb-wish">0</span></button>
-    <button class="ni" onclick="go('memories')"><span class="ni-ico">📸</span>Souvenirs<span class="nbadge" id="nb-memories">0</span></button>
-    <button class="ni" onclick="go('bosses')"><span class="ni-ico">🐉</span>Boss secrets</button>
-    <button class="ni" onclick="go('legends')"><span class="ni-ico">📖</span>Journal des Légendes</button>
-    <button class="ni" onclick="go('log')"><span class="ni-ico">📜</span>Journal</button>
+    <button class="ni" onclick="go('absurd')"><span class="ni-ico">🎲</span>Quêtes absurdes<span class="nbadge" id="nb-absurd">0/0</span><span class="ni-chev">▾</span></button>
+    <div class="mob-drawer" id="mob-absurd"></div>
+    <button class="ni" onclick="go('legendary')"><span class="ni-ico">🔥</span>Légendaires<span class="nbadge" id="nb-legendary">0/0</span><span class="ni-chev">▾</span></button>
+    <div class="mob-drawer" id="mob-legendary"></div>
+    <button class="ni" onclick="go('collectibles')"><span class="ni-ico">💎</span>Collectibles<span class="nbadge" id="nb-collect">0/0</span><span class="ni-chev">▾</span></button>
+    <div class="mob-drawer" id="mob-collectibles"></div>
+    <button class="ni" onclick="go('wishlist')"><span class="ni-ico">⭐</span>Mes Favoris<span class="nbadge" id="nb-wish">0</span><span class="ni-chev">▾</span></button>
+    <div class="mob-drawer" id="mob-wishlist"></div>
+    <button class="ni" onclick="go('memories')"><span class="ni-ico">📸</span>Souvenirs<span class="nbadge" id="nb-memories">0</span><span class="ni-chev">▾</span></button>
+    <div class="mob-drawer" id="mob-memories"></div>
+    <button class="ni" onclick="go('bosses')"><span class="ni-ico">🐉</span>Boss secrets<span class="ni-chev">▾</span></button>
+    <div class="mob-drawer" id="mob-bosses"></div>
+    <button class="ni" onclick="go('legends')"><span class="ni-ico">📖</span>Journal des Légendes<span class="ni-chev">▾</span></button>
+    <div class="mob-drawer" id="mob-legends"></div>
+    <button class="ni" onclick="go('log')"><span class="ni-ico">📜</span>Journal<span class="ni-chev">▾</span></button>
+    <div class="mob-drawer" id="mob-log"></div>
   </div>
   <div class="ng" style="margin-top:auto;padding-bottom:8px;border-top:1px solid var(--border);margin-top:12px;padding-top:12px;">
     <div class="ng-lbl">Sauvegarde</div>
-    <button class="ni" onclick="go('saveload')" style="color:var(--ocean);"><span class="ni-ico">💾</span>Export · Import</button>
+    <button class="ni" onclick="go('saveload')" style="color:var(--ocean);"><span class="ni-ico">💾</span>Export · Import<span class="ni-chev">▾</span></button>
+    <div class="mob-drawer" id="mob-saveload"></div>
   </div>
 </nav>
 
@@ -2483,15 +2549,20 @@ const FILTER_BARS={
   explorer:'explorerFilter',
 };
 
-function go(id){
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.ni').forEach(b=>b.classList.remove('active'));
-  const panel=document.getElementById('s-'+id);
-  if(panel)panel.classList.add('active');
-  document.querySelectorAll('.ni').forEach(b=>{if(b.getAttribute('onclick')===`go('${id}')`)b.classList.add('active');});
-  // Lazy render
+/* ═══════════════════════════════════════════════════
+   MOBILE ACCORDION NAVIGATION
+   On mobile (≤768px): the active panel is moved into
+   a .mob-drawer below the clicked nav button.
+   On desktop: classic side-by-side layout, unchanged.
+═══════════════════════════════════════════════════ */
+const _isMobile = () => window.innerWidth <= 768;
+
+// Track the currently open section on mobile
+let _mobOpenId = null;
+
+function _runSectionRender(id) {
+  // All lazy-render calls, shared by desktop and mobile paths
   if(ACC_MAP[id]){
-    // Inject filter bar container if section supports it
     if(FILTER_BARS[id]){
       const fbId=FILTER_BARS[id];
       let fb=document.getElementById(fbId);
@@ -2514,6 +2585,83 @@ function go(id){
   if(id==='wishlist'){renderWishlist();refreshWishBadge();}
   if(id==='dashboard'){refreshDashboard();refreshContrat();}
   if(id==='saveload'){buildExportStats();}
+}
+
+function _closeMobDrawer(id) {
+  // Put the panel back in .main, close the drawer
+  const drawer = document.getElementById('mob-' + id);
+  const panel  = document.getElementById('s-' + id);
+  const main   = document.querySelector('.main');
+  if (drawer && panel && main) {
+    main.appendChild(panel); // move back to original parent
+  }
+  if (drawer) drawer.classList.remove('open');
+}
+
+function go(id) {
+  if (_isMobile()) {
+    // ── MOBILE: accordion behaviour ──
+    const clickedSameId = _mobOpenId === id;
+
+    // Close currently open drawer (if any)
+    if (_mobOpenId) {
+      _closeMobDrawer(_mobOpenId);
+      document.querySelectorAll('.ni').forEach(b => b.classList.remove('active'));
+      _mobOpenId = null;
+    }
+
+    if (clickedSameId) {
+      // Same button clicked again → toggle closed (already done above)
+      return;
+    }
+
+    // Open new drawer
+    const drawer = document.getElementById('mob-' + id);
+    const panel  = document.getElementById('s-' + id);
+    if (!drawer || !panel) {
+      // Section has no drawer (e.g. Sauvegarde bottom link) — fall through to desktop behaviour
+      _desktopGo(id);
+      return;
+    }
+
+    // Move panel into drawer, mark active
+    drawer.appendChild(panel);
+    panel.classList.add('active');
+    drawer.classList.add('open');
+    _mobOpenId = id;
+
+    // Mark nav button active
+    document.querySelectorAll('.ni').forEach(b => {
+      if (b.getAttribute('onclick') === `go('${id}')`) b.classList.add('active');
+    });
+
+    // Run render logic
+    _runSectionRender(id);
+
+    // Scroll the drawer button into view smoothly
+    const btn = document.querySelector(`.ni[onclick="go('${id}')"]`);
+    if (btn) setTimeout(() => btn.scrollIntoView({behavior:'smooth', block:'start'}), 60);
+
+  } else {
+    // ── DESKTOP: classic layout, unchanged ──
+    _desktopGo(id);
+  }
+}
+
+function _desktopGo(id) {
+  // Make sure any panel moved to a drawer is put back first
+  if (_mobOpenId) {
+    _closeMobDrawer(_mobOpenId);
+    _mobOpenId = null;
+  }
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(b => b.classList.remove('active'));
+  const panel = document.getElementById('s-' + id);
+  if (panel) panel.classList.add('active');
+  document.querySelectorAll('.ni').forEach(b => {
+    if (b.getAttribute('onclick') === `go('${id}')`) b.classList.add('active');
+  });
+  _runSectionRender(id);
 }
 
 /* ═══════════════════════════════════════════════════
@@ -2804,6 +2952,19 @@ async function loadFromCloud() {
 }
 
 init();
+
+// ── Resize: restore layout when switching mobile ↔ desktop ──
+window.addEventListener('resize', () => {
+  if (!_isMobile() && _mobOpenId) {
+    _closeMobDrawer(_mobOpenId);
+    document.querySelectorAll('.ni').forEach(b => b.classList.remove('active'));
+    _mobOpenId = null;
+    // Ensure a panel is active on desktop
+    if (![...document.querySelectorAll('.panel')].some(p => p.classList.contains('active'))) {
+      _desktopGo('dashboard');
+    }
+  }
+});
 
 /* ─────────────────────────────────────────────────
    SERVICE WORKER — registration + update detection
