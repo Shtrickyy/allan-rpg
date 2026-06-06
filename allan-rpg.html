@@ -1,0 +1,1819 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Allan Dufas · Open World RPG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sun:#FF9F1C; --sun-l:#FFD166; --sun-pale:#fff8ec;
+  --ocean:#06D6A0; --ocean-d:#02a87e;
+  --sky:#118AB2; --sky-l:#73D2F4;
+  --coral:#EF476F; --coral-l:#FF8FA3;
+  --lav:#9B5DE5; --lav-l:#C4A0F7;
+  --gold:#F4C430; --gold-d:#c9982a;
+  --bg:#0F1117; --bg2:#14181f; --bg3:#1a1f2b;
+  --card:#181d28; --card2:#1e2434;
+  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13);
+  --text:#E8EAF0; --text-mid:#9CA3AF; --text-dim:#4B5563;
+  --r:16px; --rs:10px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* BLOBS */
+.blobs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.10;}
+.b1{width:700px;height:700px;background:var(--sun);top:-250px;right:-150px;animation:drift 22s ease-in-out infinite alternate;}
+.b2{width:600px;height:600px;background:var(--ocean);bottom:-150px;left:-200px;animation:drift 28s ease-in-out infinite alternate-reverse;}
+.b3{width:450px;height:450px;background:var(--sky);top:35%;left:35%;animation:drift 20s ease-in-out infinite alternate;}
+.b4{width:350px;height:350px;background:var(--coral);bottom:15%;right:8%;animation:drift 24s ease-in-out infinite alternate-reverse;}
+@keyframes drift{from{transform:translate(0,0)scale(1);}to{transform:translate(45px,35px)scale(1.1);}}
+
+/* LAYOUT */
+.shell{position:relative;z-index:10;display:grid;grid-template-columns:268px 1fr;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{background:rgba(12,14,20,.92);backdrop-filter:blur(24px);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+/* Player card */
+.pcard{padding:24px 18px 18px;border-bottom:1px solid var(--border);}
+.pavatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--sun),var(--coral));display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:10px;box-shadow:0 0 0 3px rgba(255,159,28,.18);}
+.pname{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;letter-spacing:-.4px;}
+.ptitle{font-size:11px;color:var(--text-dim);margin-top:2px;font-style:italic;}
+.plevel{display:inline-flex;align-items:center;gap:5px;margin-top:12px;background:rgba(255,159,28,.1);border:1px solid rgba(255,159,28,.22);border-radius:20px;padding:3px 11px;font-family:'Space Mono',monospace;font-size:11px;color:var(--sun);}
+.xp-row{margin-top:10px;display:flex;flex-direction:column;gap:5px;}
+.xp-nums{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);}
+.xp-out{height:5px;background:rgba(255,255,255,.05);border-radius:10px;overflow:hidden;}
+.xp-in{height:100%;background:linear-gradient(90deg,var(--sun),var(--coral));border-radius:10px;transition:width .8s cubic-bezier(.4,0,.2,1);}
+
+/* Nav */
+.ng{padding:14px 10px 2px;}
+.ng-lbl{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);padding:0 8px;margin-bottom:5px;}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--rs);cursor:pointer;transition:all .18s;border:1px solid transparent;background:none;color:var(--text-mid);font-family:'DM Sans',sans-serif;font-size:13px;width:100%;text-align:left;margin-bottom:2px;}
+.ni:hover{background:rgba(255,255,255,.04);color:var(--text);}
+.ni.active{background:rgba(255,159,28,.1);border-color:rgba(255,159,28,.2);color:var(--sun);font-weight:500;}
+.ni-ico{font-size:15px;flex-shrink:0;}
+.nbadge{margin-left:auto;font-family:'Space Mono',monospace;font-size:10px;padding:1px 7px;border-radius:10px;background:rgba(255,255,255,.06);color:var(--text-dim);}
+.nbadge.ok{background:rgba(6,214,160,.14);color:var(--ocean);}
+
+/* MAIN */
+.main{overflow-y:auto;height:100vh;}
+.panel{display:none;padding:36px 40px;animation:fadeUp .28s ease;}
+.panel.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* Section hero */
+.hero{margin-bottom:32px;}
+.stag{display:inline-flex;align-items:center;gap:6px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:12px;}
+.stitle{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(24px,3.5vw,36px);letter-spacing:-1px;line-height:1.1;}
+.sdesc{margin-top:9px;font-size:14px;color:var(--text-mid);font-weight:300;line-height:1.6;max-width:540px;}
+
+/* ══ CONTRAT HEBDOMADAIRE ══ */
+.contrat-card{background:linear-gradient(135deg,rgba(244,196,48,.09),rgba(255,159,28,.05));border:1px solid rgba(244,196,48,.25);border-radius:var(--r);padding:22px 24px;margin-bottom:28px;position:relative;overflow:hidden;}
+.contrat-card::after{content:'⭐';position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:72px;opacity:.06;pointer-events:none;}
+.contrat-title{font-family:'Syne',sans-serif;font-weight:800;font-size:14px;color:var(--gold);letter-spacing:1px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.contrat-slots{display:flex;flex-wrap:wrap;gap:8px;}
+.contrat-slot{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:var(--rs);border:1px dashed rgba(244,196,48,.3);background:rgba(244,196,48,.04);font-size:13px;color:var(--text-mid);cursor:pointer;transition:all .2s;min-width:160px;}
+.contrat-slot:hover{border-color:rgba(244,196,48,.5);background:rgba(244,196,48,.08);}
+.contrat-slot.filled{border-style:solid;border-color:rgba(244,196,48,.4);background:rgba(244,196,48,.1);color:var(--gold);}
+.contrat-slot.done-slot{border-color:rgba(6,214,160,.35);background:rgba(6,214,160,.08);color:var(--ocean);}
+.cs-ico{font-size:16px;}
+.cs-label{font-size:11px;font-family:'Space Mono',monospace;opacity:.6;display:block;margin-top:2px;}
+.contrat-bonus{font-family:'Space Mono',monospace;font-size:10px;color:var(--gold-d);margin-top:12px;}
+
+/* ══ MISSION DU DESTIN ══ */
+.destin-card{background:linear-gradient(135deg,rgba(155,93,229,.1),rgba(239,71,111,.06));border:1px solid rgba(155,93,229,.25);border-radius:var(--r);padding:20px 24px;margin-bottom:28px;display:flex;align-items:center;gap:18px;}
+.destin-dice{width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,var(--lav),var(--coral));display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;cursor:pointer;transition:transform .3s,box-shadow .3s;box-shadow:0 4px 20px rgba(155,93,229,.3);}
+.destin-dice:hover{transform:rotate(20deg) scale(1.1);box-shadow:0 8px 32px rgba(155,93,229,.5);}
+.destin-dice.rolling{animation:roll .6s ease;}
+@keyframes roll{0%{transform:rotate(0)}25%{transform:rotate(90deg)}50%{transform:rotate(180deg)}75%{transform:rotate(270deg)}100%{transform:rotate(360deg)}}
+.destin-info{flex:1;}
+.destin-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--lav);text-transform:uppercase;margin-bottom:5px;}
+.destin-mission{font-size:15px;font-weight:500;color:var(--text);line-height:1.4;}
+.destin-sub{font-size:12px;color:var(--text-dim);margin-top:4px;}
+.destin-btn{font-family:'Space Mono',monospace;font-size:10px;padding:7px 14px;border-radius:var(--rs);border:1px solid rgba(155,93,229,.35);background:rgba(155,93,229,.08);color:var(--lav);cursor:pointer;transition:all .2s;white-space:nowrap;}
+.destin-btn:hover{background:rgba(155,93,229,.18);}
+.destin-btn.done-btn{border-color:rgba(6,214,160,.35);background:rgba(6,214,160,.08);color:var(--ocean);}
+
+/* STATS GRID */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:28px;}
+.stat-tile{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px 14px;transition:transform .2s,border-color .2s;}
+.stat-tile:hover{transform:translateY(-2px);border-color:var(--border2);}
+.st-icon{font-size:22px;margin-bottom:8px;}
+.st-lbl{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:5px;}
+.st-val{font-family:'Syne',sans-serif;font-weight:800;font-size:26px;line-height:1;}
+.st-bar{margin-top:9px;height:3px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;}
+.st-fill{height:100%;border-radius:2px;transition:width 1s ease;}
+
+/* BIOMES */
+.biomes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:28px;}
+.biome{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px 10px 14px;text-align:center;cursor:pointer;transition:all .2s;position:relative;}
+.biome:hover{border-color:var(--border2);transform:translateY(-3px);}
+.biome.unlocked{border-color:rgba(6,214,160,.3);background:rgba(6,214,160,.06);}
+.biome.unlocked::after{content:'✓';position:absolute;top:8px;right:10px;font-size:11px;color:var(--ocean);font-weight:700;}
+.biome-ico{font-size:30px;margin-bottom:8px;}
+.biome-name{font-size:11px;color:var(--text-dim);}
+.biome.unlocked .biome-name{color:var(--ocean);}
+
+/* ACCORDION */
+.accordion{display:flex;flex-direction:column;gap:10px;}
+.qgroup{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:border-color .25s;}
+.qgroup:hover,.qgroup.open{border-color:var(--border2);}
+/* golden border for weekly quest */
+.qgroup.weekly-highlight{border-color:rgba(244,196,48,.5)!important;box-shadow:0 0 0 1px rgba(244,196,48,.15);}
+
+.qgh{display:flex;align-items:center;gap:12px;padding:16px 18px;cursor:pointer;user-select:none;transition:background .18s;}
+.qgh:hover{background:rgba(255,255,255,.025);}
+.qg-icon{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;}
+.qg-info{flex:1;}
+.qg-name{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:var(--text);line-height:1.2;}
+.qg-sub{font-size:11px;color:var(--text-dim);margin-top:3px;font-style:italic;}
+.qg-meta{display:flex;align-items:center;gap:9px;flex-shrink:0;}
+.pring{position:relative;width:36px;height:36px;}
+.pring svg{transform:rotate(-90deg);}
+.pring-txt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:9px;font-weight:700;}
+.chev{color:var(--text-dim);font-size:13px;transition:transform .3s;}
+.qgroup.open .chev{transform:rotate(180deg);}
+
+.qgbody{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.4,0,.2,1);}
+.qgbody.open{max-height:3000px;}
+.qginner{border-top:1px solid var(--border);padding:10px 14px 14px;}
+
+.sublbl{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);padding:10px 6px 5px;}
+
+/* Quest item */
+.qi{display:flex;align-items:flex-start;gap:11px;padding:10px 10px;border-radius:var(--rs);cursor:pointer;transition:background .15s;margin-bottom:2px;}
+.qi:hover{background:rgba(255,255,255,.035);}
+.qi.done{opacity:.5;}
+/* weekly-pinned item highlight */
+.qi.pinned{background:rgba(244,196,48,.06);border:1px solid rgba(244,196,48,.2);border-radius:var(--rs);}
+.qi.pinned.done{background:rgba(6,214,160,.05);border-color:rgba(6,214,160,.2);}
+
+.qchk{width:21px;height:21px;border-radius:5px;border:2px solid rgba(255,255,255,.13);background:rgba(255,255,255,.025);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:all .2s;font-size:11px;}
+.qi.done .qchk{background:var(--ocean);border-color:var(--ocean);color:var(--bg);}
+.qi.pinned:not(.done) .qchk{border-color:rgba(244,196,48,.5);}
+
+.qi-info{flex:1;}
+.qi-name{font-size:13.5px;color:var(--text);line-height:1.4;transition:color .2s;}
+.qi.done .qi-name{text-decoration:line-through;text-decoration-color:rgba(6,214,160,.4);color:var(--text-dim);}
+.qi-xp{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);margin-top:2px;}
+.qi.done .qi-xp{color:var(--ocean-d);}
+.qi-pin{font-size:10px;color:var(--gold);margin-left:auto;flex-shrink:0;align-self:center;}
+
+/* Boss / reward inline */
+.boss-inline{background:rgba(239,71,111,.07);border:1px solid rgba(239,71,111,.18);border-radius:var(--rs);padding:12px 14px;margin:8px 0;display:flex;align-items:center;gap:10px;}
+.bi-lbl{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--coral);text-transform:uppercase;margin-bottom:2px;}
+.bi-name{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--coral-l);}
+.reward-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 13px;border-radius:20px;background:rgba(244,196,48,.1);border:1px solid rgba(244,196,48,.2);font-size:12px;color:var(--sun-l);margin:7px 0;}
+
+/* COLLECTIBLES */
+.col-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:9px;}
+.col-item{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px 10px 12px;text-align:center;cursor:pointer;transition:all .2s;position:relative;}
+.col-item:hover{border-color:var(--border2);transform:translateY(-2px);}
+.col-item.found{border-color:rgba(6,214,160,.3);background:rgba(6,214,160,.06);}
+.col-item.found::after{content:'✓';position:absolute;top:7px;right:9px;font-size:11px;color:var(--ocean);font-weight:700;}
+.col-ico{font-size:26px;margin-bottom:7px;}
+.col-name{font-size:11px;color:var(--text-dim);line-height:1.3;}
+.col-item.found .col-name{color:var(--ocean);}
+
+/* JOURNAL DES LÉGENDES */
+.legend-entry{background:var(--card2);border:1px solid var(--border);border-radius:var(--r);padding:20px 22px;margin-bottom:12px;position:relative;overflow:hidden;}
+.legend-entry::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--sun);}
+.le-date{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.le-date .xp-badge{background:rgba(6,214,160,.12);border:1px solid rgba(6,214,160,.2);color:var(--ocean);padding:2px 8px;border-radius:10px;font-size:10px;}
+.le-quest{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:var(--text);margin-bottom:8px;}
+.le-story{font-size:13px;color:var(--text-mid);line-height:1.7;font-style:italic;}
+.le-story-input{width:100%;background:rgba(255,255,255,.03);border:1px solid var(--border2);border-radius:var(--rs);padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;font-style:italic;resize:none;outline:none;margin-top:8px;line-height:1.6;min-height:64px;transition:border-color .2s;}
+.le-story-input:focus{border-color:rgba(255,159,28,.3);}
+.le-story-input::placeholder{color:var(--text-dim);}
+.le-edit-btn{font-family:'Space Mono',monospace;font-size:10px;padding:5px 12px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--text-dim);cursor:pointer;transition:all .2s;margin-top:8px;}
+.le-edit-btn:hover{color:var(--text);border-color:var(--border2);}
+
+.add-legend-note{display:flex;gap:6px;margin-top:16px;}
+.add-legend-note textarea{flex:1;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:var(--rs);padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;resize:none;outline:none;line-height:1.6;min-height:56px;transition:border-color .2s;}
+.add-legend-note textarea:focus{border-color:rgba(255,159,28,.3);}
+.add-legend-note button{padding:10px 16px;border-radius:var(--rs);background:rgba(255,159,28,.15);border:1px solid rgba(255,159,28,.3);color:var(--sun);font-family:'Space Mono',monospace;font-size:11px;cursor:pointer;transition:all .2s;align-self:flex-end;white-space:nowrap;}
+.add-legend-note button:hover{background:rgba(255,159,28,.25);}
+
+.log-simple{display:flex;flex-direction:column;gap:1px;}
+.log-e{display:flex;gap:12px;padding:10px 14px;border-radius:var(--rs);font-size:13px;align-items:flex-start;}
+.log-e:nth-child(odd){background:rgba(255,255,255,.018);}
+.log-t{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);white-space:nowrap;padding-top:2px;min-width:70px;}
+.log-m{color:var(--text-mid);line-height:1.4;}
+.log-m .hi{color:var(--sun);font-weight:500;}.log-m .ok{color:var(--ocean);}
+
+/* BOSS SECRETS */
+.bs-grid{display:flex;flex-direction:column;gap:9px;}
+.bs-item{background:rgba(155,93,229,.06);border:1px solid rgba(155,93,229,.14);border-radius:var(--rs);padding:13px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s;}
+.bs-item:hover{border-color:rgba(155,93,229,.3);}
+.bs-item.defeated{background:rgba(6,214,160,.05);border-color:rgba(6,214,160,.18);opacity:.55;}
+.bs-ico{font-size:22px;}
+.bs-name{font-size:13.5px;color:var(--lav-l);font-style:italic;flex:1;}
+.bs-item.defeated .bs-name{text-decoration:line-through;color:var(--text-dim);}
+.bs-act{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);}
+
+/* GM toggle */
+.gm-row{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);margin-bottom:24px;}
+.toggle{width:42px;height:23px;background:rgba(255,255,255,.07);border-radius:12px;cursor:pointer;position:relative;transition:background .3s;flex-shrink:0;}
+.toggle.on{background:var(--ocean);}
+.toggle-k{position:absolute;top:3px;left:3px;width:17px;height:17px;border-radius:50%;background:white;transition:transform .3s;}
+.toggle.on .toggle-k{transform:translateX(19px);}
+.toggle-lbl{font-size:13px;color:var(--text-mid);}
+.toggle-lbl strong{color:var(--text);}
+
+.gm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;}
+.gm-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;transition:all .2s;}
+.gm-card:hover{border-color:var(--border2);}
+.gm-ico{font-size:24px;margin-bottom:9px;}
+.gm-name{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;margin-bottom:5px;}
+.gm-desc{font-size:11px;color:var(--text-dim);line-height:1.5;}
+
+/* Misc */
+.ssub{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:var(--text);margin:28px 0 14px;display:flex;align-items:center;gap:10px;}
+.ssub::after{content:'';flex:1;height:1px;background:var(--border);}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:var(--rs);border:1px solid var(--border2);background:rgba(255,255,255,.04);color:var(--text-mid);font-family:'Space Mono',monospace;font-size:11px;cursor:pointer;transition:all .2s;}
+.btn:hover{background:rgba(255,255,255,.08);color:var(--text);}
+.btn.danger:hover{border-color:rgba(239,71,111,.4);color:var(--coral);}
+.empty{text-align:center;padding:56px 20px;color:var(--text-dim);font-size:14px;font-style:italic;}
+
+/* TOAST */
+.toast{position:fixed;bottom:26px;right:26px;background:var(--bg3);border:1px solid var(--border2);border-radius:14px;padding:14px 18px;z-index:9999;display:flex;align-items:center;gap:13px;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:toastIn .38s cubic-bezier(.4,0,.2,1);max-width:310px;}
+@keyframes toastIn{from{transform:translateY(28px)scale(.92);opacity:0;}to{transform:translateY(0)scale(1);opacity:1;}}
+.t-ico{width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,var(--sun),var(--coral));display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;}
+.t-lbl{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--sun);text-transform:uppercase;margin-bottom:3px;}
+.t-name{font-size:13px;font-weight:500;color:var(--text);line-height:1.3;}
+.t-xp{font-family:'Space Mono',monospace;font-size:11px;color:var(--ocean);margin-top:2px;}
+
+/* DIFFICULTY BADGES */
+.diff{display:inline-flex;align-items:center;gap:3px;font-family:'Space Mono',monospace;font-size:9px;padding:2px 7px;border-radius:6px;flex-shrink:0;white-space:nowrap;}
+.diff-easy{background:rgba(6,214,160,.12);color:#06D6A0;}
+.diff-hard{background:rgba(255,159,28,.12);color:#FF9F1C;}
+.diff-boss{background:rgba(239,71,111,.12);color:#EF476F;}
+.diff-legend{background:rgba(155,93,229,.12);color:#C4A0F7;}
+
+/* WISHLIST */
+.wish-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:2px 4px;opacity:.3;transition:opacity .2s,transform .2s;flex-shrink:0;line-height:1;}
+.wish-btn:hover{opacity:.7;transform:scale(1.2);}
+.wish-btn.wished{opacity:1;transform:scale(1.1);}
+.qi.wished-item{background:rgba(244,196,48,.04);}
+
+/* Filter bar */
+.filter-bar{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
+.filter-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text-dim);font-family:'Space Mono',monospace;font-size:10px;cursor:pointer;transition:all .2s;}
+.filter-btn:hover{border-color:var(--border2);color:var(--text);}
+.filter-btn.active{border-color:var(--border2);background:rgba(255,255,255,.06);color:var(--text);}
+
+/* SAVE / LOAD */
+.saveload-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:28px;margin-bottom:16px;}
+.sl-title{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;margin-bottom:6px;display:flex;align-items:center;gap:10px;}
+.sl-desc{font-size:13px;color:var(--text-mid);margin-bottom:20px;line-height:1.6;}
+.sl-btn{display:inline-flex;align-items:center;gap:9px;padding:12px 24px;border-radius:var(--rs);font-family:'Space Mono',monospace;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;border:none;letter-spacing:.5px;}
+.sl-btn-export{background:linear-gradient(135deg,var(--ocean),var(--sky));color:#fff;box-shadow:0 4px 20px rgba(6,214,160,.3);}
+.sl-btn-export:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(6,214,160,.45);}
+.sl-btn-import{background:linear-gradient(135deg,var(--sun),var(--coral));color:#fff;box-shadow:0 4px 20px rgba(255,159,28,.3);}
+.sl-btn-import:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(255,159,28,.45);}
+.sl-stats{display:flex;flex-direction:column;gap:0;margin-bottom:20px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;}
+.sl-stat{display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid var(--border);}
+.sl-stat:last-child{border-bottom:none;}
+.sl-stat-ico{font-size:20px;width:26px;text-align:center;flex-shrink:0;}
+.sl-stat-label{font-size:12px;color:var(--text-dim);flex:1;}
+.sl-stat-val{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;}
+.sl-feedback{margin-top:14px;padding:12px 16px;border-radius:var(--rs);font-size:13px;display:none;line-height:1.5;}
+.sl-feedback.ok{background:rgba(6,214,160,.1);border:1px solid rgba(6,214,160,.25);color:var(--ocean);display:block;}
+.sl-feedback.err{background:rgba(239,71,111,.1);border:1px solid rgba(239,71,111,.25);color:var(--coral-l);display:block;}
+
+/* Responsive */
+@media(max-width:768px){.shell{grid-template-columns:1fr;}.sidebar{position:relative;height:auto;}.main{height:auto;}.panel{padding:22px 16px;}.stats-grid{grid-template-columns:repeat(2,1fr);}}
+</style>
+</head>
+<body>
+<div class="blobs"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div></div>
+
+<div class="shell">
+<!-- ═══════ SIDEBAR ═══════ -->
+<nav class="sidebar">
+  <div class="pcard">
+    <div class="pavatar">🧭</div>
+    <div class="pname">Allan Dufas</div>
+    <div class="ptitle">Le Monde Ouvert · Saison 31</div>
+    <div class="plevel">⚡ Niveau <span id="lvlNum">1</span></div>
+    <div class="xp-row">
+      <div class="xp-nums"><span><span id="xpE">0</span> XP</span><span>/ <span id="xpT">0</span></span></div>
+      <div class="xp-out"><div class="xp-in" id="xpBar" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="ng">
+    <div class="ng-lbl">Monde</div>
+    <button class="ni active" onclick="go('dashboard')"><span class="ni-ico">🗺️</span>Tableau de bord</button>
+    <button class="ni" onclick="go('mq')"><span class="ni-ico">🌍</span>Quête Principale<span class="nbadge" id="nb-mq">0/0</span></button>
+  </div>
+  <div class="ng">
+    <div class="ng-lbl">Guildes</div>
+    <button class="ni" onclick="go('humans')"><span class="ni-ico">🍻</span>Guilde des Humains<span class="nbadge" id="nb-humans">0/0</span></button>
+    <button class="ni" onclick="go('improv')"><span class="ni-ico">🎭</span>Guilde Improvisation<span class="nbadge" id="nb-improv">0/0</span></button>
+    <button class="ni" onclick="go('creators')"><span class="ni-ico">🎨</span>Guilde des Créateurs<span class="nbadge" id="nb-creators">0/0</span></button>
+    <button class="ni" onclick="go('artists')"><span class="ni-ico">📸</span>Guilde des Artistes<span class="nbadge" id="nb-artists">0/0</span></button>
+    <button class="ni" onclick="go('explorer')"><span class="ni-ico">🌴</span>Guilde Explorateur<span class="nbadge" id="nb-explorer">0/0</span></button>
+    <button class="ni" onclick="go('warrior')"><span class="ni-ico">⚔️</span>Guilde Guerrier<span class="nbadge" id="nb-warrior">0/0</span></button>
+    <button class="ni" onclick="go('charisma')"><span class="ni-ico">💃</span>DLC Charisme<span class="nbadge" id="nb-charisma">0/0</span></button>
+    <button class="ni" onclick="go('sage')"><span class="ni-ico">📚</span>Le Sage<span class="nbadge" id="nb-sage">0/0</span></button>
+  </div>
+  <div class="ng">
+    <div class="ng-lbl">Extras</div>
+    <button class="ni" onclick="go('absurd')"><span class="ni-ico">🎲</span>Quêtes absurdes<span class="nbadge" id="nb-absurd">0/0</span></button>
+    <button class="ni" onclick="go('legendary')"><span class="ni-ico">🔥</span>Légendaires<span class="nbadge" id="nb-legendary">0/0</span></button>
+    <button class="ni" onclick="go('collectibles')"><span class="ni-ico">💎</span>Collectibles<span class="nbadge" id="nb-collect">0/0</span></button>
+    <button class="ni" onclick="go('wishlist')"><span class="ni-ico">⭐</span>Mes Favoris<span class="nbadge" id="nb-wish">0</span></button>
+    <button class="ni" onclick="go('bosses')"><span class="ni-ico">🐉</span>Boss secrets</button>
+    <button class="ni" onclick="go('legends')"><span class="ni-ico">📖</span>Journal des Légendes</button>
+    <button class="ni" onclick="go('log')"><span class="ni-ico">📜</span>Journal</button>
+  </div>
+  <div class="ng" style="margin-top:auto;padding-bottom:8px;border-top:1px solid var(--border);margin-top:12px;padding-top:12px;">
+    <div class="ng-lbl">Sauvegarde</div>
+    <button class="ni" onclick="go('saveload')" style="color:var(--ocean);"><span class="ni-ico">💾</span>Export · Import</button>
+  </div>
+</nav>
+
+<!-- ═══════ MAIN ═══════ -->
+<main class="main">
+
+<!-- DASHBOARD -->
+<div class="panel active" id="s-dashboard">
+  <div class="hero">
+    <div class="stag" style="background:rgba(255,159,28,.1);color:var(--sun);">🌅 Saison 31</div>
+    <div class="stitle">Le Monde est plus grand<br>que Cachan.</div>
+    <div class="sdesc">Du temps. Des économies. De la liberté. Aucune idée de la suite. Un terrain de jeu parfait. 🚀</div>
+  </div>
+
+  <!-- Contrat hebdo -->
+  <div class="contrat-card">
+    <div class="contrat-title">⭐ Contrat de la semaine</div>
+    <div class="contrat-slots" id="contratSlots"></div>
+    <div class="contrat-bonus" id="contratBonus"></div>
+  </div>
+
+  <!-- Mission du destin -->
+  <div class="destin-card">
+    <div class="destin-dice" id="destinDice" onclick="rollDestin()" title="Lancer le dé du destin">🎲</div>
+    <div class="destin-info">
+      <div class="destin-label">🎲 Mission du Destin</div>
+      <div class="destin-mission" id="destinText">Lance le dé pour recevoir ta mission de la semaine...</div>
+      <div class="destin-sub" id="destinSub">Chaque semaine, une mission aléatoire générée par le jeu.</div>
+    </div>
+    <button class="destin-btn" id="destinDoneBtn" onclick="completeDestin()" style="display:none">✓ Accomplie</button>
+  </div>
+
+  <div class="stats-grid" id="dashStats"></div>
+  <div class="ssub">Progression par guilde</div>
+  <div id="guildProgress" style="display:flex;flex-direction:column;gap:10px;"></div>
+</div>
+
+<!-- MAIN QUEST -->
+<div class="panel" id="s-mq">
+  <div class="hero">
+    <div class="stag" style="background:rgba(17,138,178,.12);color:var(--sky-l);">🌍 Quête principale</div>
+    <div class="stitle">Le Monde est plus grand que Cachan</div>
+    <div class="sdesc">Prouver par l'expérience que le monde est vaste. XP max · Récompense : Mode Expatriation 🌎</div>
+  </div>
+  <div class="accordion" id="acc-mq"></div>
+</div>
+
+<!-- HUMANS -->
+<div class="panel" id="s-humans">
+  <div class="hero">
+    <div class="stag" style="background:rgba(255,159,28,.1);color:var(--sun);">🍻 Guilde</div>
+    <div class="stitle">Guilde des Humains</div>
+    <div class="sdesc">"Ce qui me fait me sentir vivant, c'est les gens." — Ton arbre principal.</div>
+  </div>
+  <div class="accordion" id="acc-humans"></div>
+</div>
+
+<!-- IMPROV -->
+<div class="panel" id="s-improv">
+  <div class="hero">
+    <div class="stag" style="background:rgba(239,71,111,.1);color:var(--coral-l);">🎭 Guilde</div>
+    <div class="stitle">Guilde de l'Improvisation</div>
+    <div class="sdesc">Probablement l'une des plus importantes. Dire oui avant de savoir comment.</div>
+  </div>
+  <div class="accordion" id="acc-improv"></div>
+</div>
+
+<!-- CREATORS (merged with artists) -->
+<div class="panel" id="s-creators">
+  <div class="hero">
+    <div class="stag" style="background:rgba(155,93,229,.1);color:var(--lav-l);">🎨 Guilde</div>
+    <div class="stitle">Guilde des Créateurs</div>
+    <div class="sdesc">Barde · Écrivain · Photographe · Documentariste · Conteur. L'art comme moyen d'être pleinement vivant.</div>
+  </div>
+  <div class="filter-bar" id="creatorsFilter"></div>
+  <div class="accordion" id="acc-creators"></div>
+</div>
+
+
+<!-- EXPLORER -->
+<div class="panel" id="s-explorer">
+  <div class="hero">
+    <div class="stag" style="background:rgba(6,214,160,.1);color:var(--ocean);">🌴 Guilde</div>
+    <div class="stitle">Guilde de l'Explorateur</div>
+    <div class="sdesc">Biomes. Week-ends aléatoires. Dormir ailleurs. Le monde comme terrain de jeu.</div>
+  </div>
+  <div class="ssub">🗺️ Biomes débloqués</div>
+  <div class="biomes-grid" id="biomesGrid"></div>
+  <div class="accordion" id="acc-explorer"></div>
+</div>
+
+<!-- WARRIOR -->
+<div class="panel" id="s-warrior">
+  <div class="hero">
+    <div class="stag" style="background:rgba(239,71,111,.1);color:var(--coral-l);">⚔️ Guilde</div>
+    <div class="stitle">Guilde Guerrier</div>
+    <div class="sdesc">Haltérophilie. Sports d'aventure. Skills acrobatiques. La forge du corps.</div>
+  </div>
+  <div class="accordion" id="acc-warrior"></div>
+</div>
+
+<!-- CHARISMA -->
+<div class="panel" id="s-charisma">
+  <div class="hero">
+    <div class="stag" style="background:rgba(239,71,111,.1);color:var(--coral-l);">💃 DLC</div>
+    <div class="stitle">DLC Charisme</div>
+    <div class="sdesc">Salsa. Théâtre. Stand-up. Boss : la peur du ridicule et le regard des autres.</div>
+  </div>
+  <div class="accordion" id="acc-charisma"></div>
+</div>
+
+<!-- SAGE -->
+<div class="panel" id="s-sage">
+  <div class="hero">
+    <div class="stag" style="background:rgba(155,93,229,.1);color:var(--lav-l);">📚 Quêtes</div>
+    <div class="stitle">Le Sage</div>
+    <div class="sdesc">Langues, disciplines nouvelles, livres. L'esprit aussi mérite son programme.</div>
+  </div>
+  <div class="accordion" id="acc-sage"></div>
+</div>
+
+<!-- ABSURD -->
+<div class="panel" id="s-absurd">
+  <div class="hero">
+    <div class="stag" style="background:rgba(255,159,28,.1);color:var(--sun);">🎲 Fun</div>
+    <div class="stitle">Quêtes Absurdes</div>
+    <div class="sdesc">Les meilleures histoires viennent souvent de là. Aucune logique requise.</div>
+  </div>
+  <div class="accordion" id="acc-absurd"></div>
+</div>
+
+<!-- LEGENDARY -->
+<div class="panel" id="s-legendary">
+  <div class="hero">
+    <div class="stag" style="background:rgba(239,71,111,.1);color:var(--coral);">🔥 Légendaire</div>
+    <div class="stitle">Quêtes Légendaires</div>
+    <div class="sdesc">Les trucs qui te ressemblent vraiment. Pas de raccourcis.</div>
+  </div>
+  <div class="accordion" id="acc-legendary"></div>
+</div>
+
+<!-- COLLECTIBLES -->
+<div class="panel" id="s-collectibles">
+  <div class="hero">
+    <div class="stag" style="background:rgba(6,214,160,.08);color:var(--ocean);">💎 Collection</div>
+    <div class="stitle">Collectibles Cachés</div>
+    <div class="sdesc">À récupérer à 100%. Clique pour marquer comme trouvé.</div>
+  </div>
+  <div class="ssub">Rencontres</div><div class="col-grid" id="col-enc"></div>
+  <div class="ssub">Compétences</div><div class="col-grid" id="col-skills"></div>
+</div>
+
+<!-- BOSS SECRETS -->
+<div class="panel" id="s-bosses">
+  <div class="hero">
+    <div class="stag" style="background:rgba(155,93,229,.1);color:var(--lav);">🐉 Boss</div>
+    <div class="stitle">Les vrais boss du jeu</div>
+    <div class="sdesc">Pas les recruteurs. Pas le chômage. Les ennemis intérieurs.</div>
+  </div>
+  <div class="gm-row">
+    <div class="toggle" id="gmToggle" onclick="toggleGM()"><div class="toggle-k"></div></div>
+    <div class="toggle-lbl"><strong>Mode Game Master</strong> — Active le contrat hebdomadaire sur le dashboard (optionnel)</div>
+  </div>
+  <div class="bs-grid" id="bsGrid"></div>
+</div>
+
+<!-- JOURNAL DES LÉGENDES -->
+<div class="panel" id="s-legends">
+  <div class="hero">
+    <div class="stag" style="background:rgba(255,159,28,.1);color:var(--sun);">📖 Légendes</div>
+    <div class="stitle">Journal des Légendes</div>
+    <div class="sdesc">Chaque grande quête mérite une histoire. Dans 5 ans, ce sera la partie la plus précieuse. 🍻</div>
+  </div>
+  <div id="legendsList"></div>
+  <div class="empty" id="legendsEmpty">Aucune légende pour l'instant. Accomplis ta première grande quête.</div>
+</div>
+
+<!-- LOG -->
+<div class="panel" id="s-log">
+  <div class="hero">
+    <div class="stag" style="background:rgba(255,255,255,.05);color:var(--text-mid);">📜 Historique</div>
+    <div class="stitle">Journal</div>
+    <div class="sdesc">Toutes tes actions, dans l'ordre.</div>
+  </div>
+  <div style="display:flex;justify-content:flex-end;margin-bottom:14px;"><button class="btn danger" onclick="clearLog()">🗑 Effacer</button></div>
+  <div class="log-simple" id="logList"></div>
+  <div class="empty" id="logEmpty">L'aventure commence ici...</div>
+</div>
+
+<!-- WISHLIST -->
+<div class="panel" id="s-wishlist">
+  <div class="hero">
+    <div class="stag" style="background:rgba(244,196,48,.1);color:var(--gold);">⭐ Favoris</div>
+    <div class="stitle">Mes Favoris</div>
+    <div class="sdesc">Les quêtes que tu as envie de faire bientôt. Clique sur ⭐ dans n'importe quelle guilde pour en ajouter.</div>
+  </div>
+  <div id="wishlistContent"></div>
+</div>
+
+<!-- SAVE / LOAD -->
+<div class="panel" id="s-saveload">
+  <div class="hero">
+    <div class="stag" style="background:rgba(6,214,160,.1);color:var(--ocean);">💾 Sauvegarde</div>
+    <div class="stitle">Export · Import</div>
+    <div class="sdesc">Télécharge ta progression en JSON et recharge-la sur n'importe quel appareil ou entre deux sessions.</div>
+  </div>
+
+  <!-- EXPORT -->
+  <div class="saveload-card">
+    <div class="sl-title">📤 Exporter ma progression</div>
+    <div class="sl-desc">Télécharge un fichier <code style="font-family:'Space Mono',monospace;background:rgba(255,255,255,.07);padding:1px 6px;border-radius:4px;font-size:12px;">allan-rpg-save.json</code> contenant toutes tes quêtes, XP, légendes et journal. Garde-le précieusement.</div>
+    <div class="sl-stats" id="exportStats"></div>
+    <button class="sl-btn sl-btn-export" onclick="exportSave()">📤 Télécharger le fichier JSON</button>
+    <div class="sl-feedback" id="exportFeedback"></div>
+  </div>
+
+  <!-- IMPORT -->
+  <div class="saveload-card">
+    <div class="sl-title">📥 Importer une sauvegarde</div>
+    <div class="sl-desc">Sélectionne un fichier JSON exporté précédemment pour restaurer ta progression. <strong style="color:var(--coral-l);">Attention :</strong> cela remplacera ta sauvegarde actuelle.</div>
+    <input type="file" id="importFileInput" accept=".json,application/json" style="display:none" onchange="handleImport(event)">
+    <button class="sl-btn sl-btn-import" onclick="document.getElementById('importFileInput').click()">📥 Choisir un fichier JSON</button>
+    <div class="sl-feedback" id="importFeedback"></div>
+  </div>
+</div>
+
+</main>
+</div><!-- end shell -->
+
+<script>
+/* ═══════════════════════════════════════════════════
+   ALL QUEST DATA
+═══════════════════════════════════════════════════ */
+const SECTIONS = {
+
+mq:{label:'Quête Principale',navId:'nb-mq',groups:[
+  {id:'gmq1',icon:'💼',color:'#118AB2',name:'Carrière alignée',sub:'Dublin · Amsterdam · Barcelone · Remote EU',
+   quests:[
+    {id:'mq1',name:'Décrocher un job aligné (humain + tech + liberté)',xp:1000,d:'boss'},
+    {id:'mq2',name:'Atteindre 55k+',xp:800,d:'boss'},
+    {id:'mq3',name:'Créer un projet personnel qui génère de la valeur',xp:600,d:'hard'},
+  ]},
+  {id:'gmq2',icon:'🌍',color:'#06D6A0',name:"S'expatrier",sub:'La grande quête',
+   quests:[
+    {id:'mq4',name:"S'expatrier quelques mois (Dublin, Amsterdam, Barcelone…)",xp:1000,d:'legend'},
+    {id:'mq5',name:"Travailler à distance depuis l'étranger",xp:800,d:'boss'},
+    {id:'mq6',name:'Construire une vie choisie, pas subie',xp:1200,d:'legend'},
+  ]},
+  {id:'gmq3',icon:'🏠',color:'#FF9F1C',name:'Indépendance',
+   boss:{name:"L'Appartement",icon:'🔑'},reward:"🏆 L'adulte fonctionnel",
+   quests:[
+    {id:'mq7',name:'Visiter 20 appartements',xp:200,d:'easy'},
+    {id:'mq8',name:'Dormir seul une nuit dans un Airbnb parisien',xp:150,d:'easy'},
+    {id:'mq9',name:'Inviter des amis à dîner chez moi',xp:150,d:'easy'},
+    {id:'mq10',name:'Acheter une plante et la garder en vie 6 mois',xp:100,d:'easy'},
+  ]},
+]},
+
+humans:{label:'Guilde des Humains',navId:'nb-humans',groups:[
+  {id:'gh1',icon:'☕',color:'#FF9F1C',name:'Niveau 1 · Échauffement social',reward:'🏆 "PNJ ? Quel PNJ ?"',
+   quests:[
+    {id:'h1',name:'Boire un café avec un inconnu',xp:150,d:'easy'},
+    {id:'h2',name:'Parler 10 minutes avec un retraité',xp:100,d:'easy'},
+    {id:'h3',name:'Complimenter 20 personnes',xp:200,d:'easy'},
+    {id:'h4',name:"Inviter quelqu'un à déjeuner",xp:150,d:'easy'},
+  ]},
+  {id:'gh2',icon:'🚀',color:'#EF476F',name:'Niveau 2 · Zone de confort',reward:'🏆 "Personnage Joueur"',
+   quests:[
+    {id:'h5',name:'Aller seul à un meetup',xp:250,d:'hard'},
+    {id:'h6',name:'Aller seul à un vernissage',xp:200,d:'easy'},
+    {id:'h7',name:'Aller seul à un concert',xp:200,d:'easy'},
+    {id:'h8',name:'Participer à un apéro polyglotte',xp:300,d:'hard'},
+  ]},
+  {id:'gh3',icon:'🌐',color:'#06D6A0',name:'Niveau 3 · Le Connecteur',reward:'🏆 "Maître des connexions"',
+   quests:[
+    {id:'h9',name:'Organiser un apéro',xp:300,d:'easy'},
+    {id:'h10',name:'Réunir 5 personnes qui ne se connaissent pas',xp:400,d:'hard'},
+    {id:'h11',name:'Présenter deux personnes qui deviennent amies',xp:500,d:'boss'},
+  ]},
+  {id:'gh4',icon:'🔭',color:'#9B5DE5',name:'Curiosité Humaine',
+   quests:[
+    {id:'h12',name:"Déjeuner avec quelqu'un de 20 ans plus âgé",xp:200,d:'easy'},
+    {id:'h13',name:"Déjeuner avec quelqu'un de 20 ans plus jeune",xp:200,d:'easy'},
+    {id:'h14',name:"Rencontrer quelqu'un qui a changé de vie",xp:300,d:'hard'},
+    {id:'h15',name:'Rencontrer un artiste',xp:200,d:'easy'},
+    {id:'h16',name:'Rencontrer un entrepreneur',xp:200,d:'easy'},
+    {id:'h17',name:"Rencontrer quelqu'un vivant à l'étranger",xp:250,d:'easy'},
+    {id:'h18',name:"Interviewer un inconnu (enregistrer l'échange)",xp:350,d:'hard'},
+  ]},
+  {id:'gh5',icon:'❤️',color:'#FF8FA3',name:'❤️ Quêtes sentimentales',
+   sub:"Le but : retrouver le jeu, pas trouver quelqu'un.",reward:'🏆 "Léger"',
+   quests:[
+    {id:'h19',name:'Demander un numéro',xp:200,d:'hard'},
+    {id:'h20',name:'Faire un date totalement improvisé',xp:300,d:'boss'},
+    {id:'h21',name:"Dire à quelqu'un qu'elle est jolie",xp:150,d:'hard'},
+    {id:'h22',name:"Inviter quelqu'un à une expo",xp:200,d:'hard'},
+    {id:'h23',name:'Danser avec une inconnue',xp:250,d:'hard'},
+  ]},
+]},
+
+improv:{label:'Guilde Improvisation',navId:'nb-improv',groups:[
+  {id:'gi1',icon:'🎭',color:'#EF476F',name:'Dire oui avant de savoir comment',
+   sub:'Chaque item = une expérience non planifiée',
+   quests:[
+    {id:'i1',name:'Aller à un meetup (sans connaître personne)',xp:250,d:'hard'},
+    {id:'i2',name:'Aller seul à une soirée inconnue',xp:300,d:'hard'},
+    {id:'i3',name:"Faire un cours de théâtre d'impro",xp:350,d:'hard'},
+    {id:'i4',name:'Participer à un apéro polyglotte',xp:250,d:'hard'},
+    {id:'i5',name:'Acheter un billet pour un spectacle inconnu',xp:200,d:'easy'},
+    {id:'i6',name:'Manger dans un restaurant jamais testé, au hasard',xp:150,d:'easy'},
+    {id:'i7',name:'Faire un voyage improvisé (décision < 24h)',xp:400,d:'boss'},
+    {id:'i8',name:'Participer à un atelier créatif imprévu',xp:300,d:'hard'},
+    {id:'i9',name:'Assister à une conférence aléatoire',xp:250,d:'easy'},
+    {id:'i10',name:'Dire oui à une invitation que tu aurais refusée',xp:300,d:'hard'},
+  ]},
+]},
+
+creators:{label:'Guilde des Créateurs',navId:'nb-creators',groups:[
+  {id:'gc1',icon:'🎸',color:'#FF9F1C',name:'Branche Barde',
+   quests:[
+    {id:'cr1',name:'Acheter une guitare',xp:100,d:'easy'},
+    {id:'cr2',name:'Apprendre 3 accords',xp:200,d:'easy'},
+    {id:'cr3',name:'Jouer une chanson complète',xp:300,d:'hard'},
+    {id:'cr4',name:"Jouer devant quelqu'un",xp:400,d:'boss'},
+    {id:'cr5',name:'Participer à une jam session',xp:500,d:'boss'},
+  ]},
+  {id:'gc2',icon:'✍️',color:'#9B5DE5',name:'Branche Écrivain',
+   quests:[
+    {id:'cr6',name:'Journal 30 jours consécutifs',xp:400,d:'hard'},
+    {id:'cr7',name:'Écrire un récit de voyage',xp:300,d:'hard'},
+    {id:'cr8',name:"Écrire le portrait d'un inconnu",xp:250,d:'hard'},
+    {id:'cr9',name:'Écrire son manifeste personnel',xp:500,d:'boss'},
+  ]},
+  {id:'gc3',icon:'📸',color:'#C4A0F7',name:'Photographe · Street',
+   boss:{name:"Demander l'autorisation",icon:'😬'},
+   quests:[
+    {id:'cr10',name:'Sélectionner 100 photos parmi mes archives',xp:150,d:'easy'},
+    {id:'cr11',name:'Photographier 10 inconnus dans la rue',xp:200,d:'hard'},
+    {id:'cr12',name:'Photographier 25 inconnus',xp:300,d:'hard'},
+    {id:'cr13',name:'Photographier 50 inconnus',xp:500,d:'boss'},
+    {id:'cr14',name:'Imprimer 10 photos',xp:200,d:'easy'},
+    {id:'cr15',name:'Vendre une photo',xp:400,d:'boss'},
+  ]},
+  {id:'gc4',icon:'🎥',color:'#06D6A0',name:'Documentariste',
+   quests:[
+    {id:'cr16',name:'Choisir un thème documentaire',xp:100,d:'easy'},
+    {id:'cr17',name:'Réaliser une série photo narrative (20 photos)',xp:500,d:'hard'},
+    {id:'cr18',name:'Réaliser un mini-documentaire vidéo',xp:700,d:'boss'},
+    {id:'cr19',name:'Faire une exposition dans un café',xp:600,d:'boss'},
+    {id:'cr20',name:'Interviewer un inconnu (vidéo ou audio)',xp:350,d:'hard'},
+  ]},
+  {id:'gc5',icon:'🎤',color:'#FF9F1C',name:'Conteur · Stand-up',
+   reward:"🏆 \"Je l'ai vraiment fait\" (légendaire)",
+   quests:[
+    {id:'cr21',name:'Écrire 5 minutes de stand-up',xp:200,d:'hard'},
+    {id:'cr22',name:'Monter sur scène',xp:1000,d:'legend'},
+  ]},
+]},
+
+explorer:{label:'Guilde Explorateur',navId:'nb-explorer',groups:[
+  {id:'ge1',icon:'🗼',color:'#118AB2',name:'Parisien Touriste',
+   sub:'10 trucs jamais faits à Paris',
+   quests:[
+    {id:'ex1',name:'Monter en haut de la Tour Montparnasse',xp:100,d:'easy'},
+    {id:'ex2',name:'Faire du canoë à Paris',xp:150,d:'easy'},
+    {id:'ex3',name:'Assister à un procès public',xp:200,d:'easy'},
+    {id:'ex4',name:'Faire une visite guidée insolite',xp:150,d:'easy'},
+    {id:'ex5',name:'Visiter les catacombes',xp:150,d:'easy'},
+    {id:'ex6',name:'5 autres activités parisiennes jamais faites',xp:250,d:'easy'},
+  ]},
+  {id:'ge2',icon:'🚂',color:'#EF476F',name:'Week-end Aléatoire',
+   sub:'Prendre un train sans préparer. 48h. Une ville au hasard.',
+   quests:[
+    {id:'ex7',name:'Acheter un billet vers destination inconnue (< 100€)',xp:300,d:'hard'},
+    {id:'ex8',name:'Passer 48h dans une ville sans plan',xp:400,d:'boss'},
+    {id:'ex9',name:'Recommencer (2ème week-end aléatoire)',xp:500,d:'boss'},
+  ]},
+  {id:'ge3',icon:'🏕️',color:'#06D6A0',name:'Dormir Ailleurs',
+   sub:'Collection complète',
+   quests:[
+    {id:'ex10',name:'Dormir dans un refuge de montagne',xp:250,d:'hard'},
+    {id:'ex11',name:'Dormir dans une auberge de jeunesse',xp:150,d:'easy'},
+    {id:'ex12',name:'Dormir dans une cabane',xp:250,d:'hard'},
+    {id:'ex13',name:'Dormir sur un bateau',xp:300,d:'hard'},
+    {id:'ex14',name:'Dormir à la belle étoile',xp:300,d:'hard'},
+    {id:'ex15',name:'Dormir dans un temple',xp:400,d:'boss'},
+  ]},
+]},
+
+warrior:{label:'Guilde Guerrier',navId:'nb-warrior',groups:[
+  {id:'gw1',icon:'🏋️',color:'#EF476F',name:'Haltérophile · Paliers',
+   sub:'Actuels : Snatch 80 · C&J 97.5 · Total 177.5',
+   quests:[
+    {id:'w1',name:'Snatch 85 kg',xp:300,d:'hard'},
+    {id:'w2',name:'Snatch 90 kg',xp:500,d:'boss'},
+    {id:'w3',name:'Clean & Jerk 100 kg',xp:400,d:'boss'},
+    {id:'w4',name:'Clean & Jerk 110 kg',xp:600,d:'boss'},
+    {id:'w5',name:'Total olympique 200 kg',xp:500,d:'boss'},
+    {id:'w6',name:'Total olympique 220 kg',xp:800,d:'legend'},
+    {id:'w7',name:'Participer à une compétition',xp:600,d:'hard'},
+    {id:'w8',name:'Participer à une compétition hors Île-de-France',xp:700,d:'hard'},
+    {id:'w9',name:'Monter sur un podium',xp:1200,d:'legend'},
+  ]},
+  {id:'gw2',icon:'🧗',color:'#06D6A0',name:'Escalade',
+   quests:[
+    {id:'w10',name:'Retourner grimper',xp:150,d:'easy'},
+    {id:'w11',name:'Première voie 6a',xp:250,d:'hard'},
+    {id:'w12',name:'Première voie 6b',xp:350,d:'boss'},
+    {id:'w13',name:'Première voie extérieure',xp:400,d:'boss'},
+  ]},
+  {id:'gw3',icon:'🏃',color:'#118AB2',name:'Endurance',
+   quests:[
+    {id:'w14',name:'Premier 10 km officiel',xp:300,d:'hard'},
+    {id:'w15',name:'Premier semi-marathon',xp:600,d:'boss'},
+    {id:'w16',name:'Premier marathon',xp:1000,d:'legend'},
+  ]},
+  {id:'gw4',icon:'🥊',color:'#EF476F',name:'Sports de combat',
+   quests:[
+    {id:'w17',name:'Premier cours de boxe',xp:200,d:'easy'},
+    {id:'w18',name:'Premier cours de jiu-jitsu',xp:200,d:'easy'},
+    {id:'w19',name:'Premier cours de MMA',xp:200,d:'easy'},
+  ]},
+  {id:'gw5',icon:'🌄',color:'#9B5DE5',name:"Sports d'aventure",
+   quests:[
+    {id:'w20',name:'Via Ferrata',xp:300,d:'hard'},
+    {id:'w21',name:'Parcours Ninja Warrior',xp:300,d:'hard'},
+    {id:'w22',name:'Cours de parkour',xp:250,d:'hard'},
+    {id:'w23',name:'Journée voile',xp:300,d:'hard'},
+    {id:'w24',name:'Randonnée 2 jours',xp:300,d:'hard'},
+    {id:'w25',name:'Randonnée 5 jours',xp:600,d:'boss'},
+    {id:'w26',name:"Trek à l'étranger",xp:800,d:'boss'},
+    {id:'w27',name:'Stage de survie',xp:700,d:'boss'},
+  ]},
+  {id:'gw6',icon:'🤸',color:'#FFD166',name:'Handstand',
+   quests:[
+    {id:'w28',name:'Handstand 10 secondes',xp:200,d:'hard'},
+    {id:'w29',name:'Handstand 30 secondes',xp:350,d:'boss'},
+    {id:'w30',name:'Handstand Push-Up',xp:500,d:'boss'},
+    {id:'w31',name:'Handstand sur une main',xp:800,d:'legend'},
+    {id:'w32',name:'Flow complet en handstand',xp:600,d:'legend'},
+  ]},
+  {id:'gw7',icon:'🔄',color:'#FF9F1C',name:'Acrobaties',
+   quests:[
+    {id:'w33',name:'Roue propre',xp:150,d:'easy'},
+    {id:'w34',name:'Rondade',xp:250,d:'hard'},
+    {id:'w35',name:'Premier salto avant',xp:500,d:'boss'},
+    {id:'w36',name:'Premier salto arrière',xp:600,d:'legend'},
+    {id:'w37',name:'Enchaîner plusieurs figures',xp:700,d:'legend'},
+  ]},
+]},
+
+charisma:{label:'DLC Charisme',navId:'nb-charisma',groups:[
+  {id:'gch1',icon:'💃',color:'#EF476F',name:'Branche Salsa',
+   boss:{name:'La peur du ridicule',icon:'😰'},
+   quests:[
+    {id:'c1',name:"Cours d'essai de salsa",xp:150,d:'easy'},
+    {id:'c2',name:'5 cours de salsa',xp:300,d:'hard'},
+    {id:'c3',name:'Soirée salsa',xp:300,d:'hard'},
+    {id:'c4',name:"Inviter quelqu'un à danser",xp:250,d:'boss'},
+  ]},
+  {id:'gch2',icon:'🎭',color:'#9B5DE5',name:'Branche Théâtre',
+   boss:{name:'Le regard des autres',icon:'👁️'},
+   quests:[
+    {id:'c5',name:"Cours d'essai de théâtre",xp:150,d:'easy'},
+    {id:'c6',name:"Session d'improvisation",xp:300,d:'hard'},
+    {id:'c7',name:'Spectacle devant public',xp:600,d:'boss'},
+  ]},
+]},
+
+sage:{label:'Le Sage',navId:'nb-sage',groups:[
+  {id:'gsg1',icon:'📖',color:'#9B5DE5',name:'Lecture',reward:'🏆 Polymathe',
+   quests:[
+    {id:'sg1',name:'Lire 12 livres en 12 mois',xp:400,d:'hard'},
+    {id:'sg2',name:'Lire un livre totalement hors de ma zone habituelle',xp:200,d:'easy'},
+    {id:'sg3',name:'Tenir le carnet rouge 1 an (1 photo + 1 rencontre + 1 réflexion / semaine)',xp:600,d:'boss'},
+  ]},
+  {id:'gsg2',icon:'🌐',color:'#FF9F1C',name:'Langues',
+   quests:[
+    {id:'sg4',name:'Tenir une conversation anglais 30 min à voix haute',xp:300,d:'hard'},
+    {id:'sg5',name:"Apprendre l'espagnol — tenir une conversation 30 min",xp:500,d:'boss'},
+    {id:'sg6',name:'Apprendre 20 phrases en japonais',xp:200,d:'easy'},
+  ]},
+  {id:'gsg3',icon:'🎓',color:'#118AB2',name:'Nouvelles disciplines',
+   quests:[
+    {id:'sg7',name:'Suivre un cours de photographie',xp:300,d:'easy'},
+    {id:'sg8',name:'Suivre un cours de danse sociale',xp:300,d:'easy'},
+    {id:'sg9',name:"Assister à un cours de philosophie",xp:200,d:'easy'},
+    {id:'sg10',name:'Prendre un cours de cuisine italienne',xp:200,d:'easy'},
+    {id:'sg11',name:'Prendre un cours de poterie',xp:200,d:'easy'},
+  ]},
+]},
+
+absurd:{label:'Quêtes Absurdes',navId:'nb-absurd',groups:[
+  {id:'gab1',icon:'🎲',color:'#FF9F1C',name:'Succès absurdes',
+   sub:'Les meilleures histoires viennent souvent de là',
+   quests:[
+    {id:'ab1',name:'Manger seul au restaurant sans téléphone',xp:150,d:'easy'},
+    {id:'ab2',name:'Aller au cinéma seul',xp:100,d:'easy'},
+    {id:'ab3',name:'Partir 24h avec juste un sac à dos',xp:200,d:'easy'},
+    {id:'ab4',name:'Faire une activité où tu es le plus nul du groupe',xp:250,d:'hard'},
+    {id:'ab5',name:'Chanter au karaoké',xp:200,d:'hard'},
+    {id:'ab6',name:'Faire du modèle vivant (dessiner ou être dessiné)',xp:300,d:'boss'},
+    {id:'ab7',name:'Danser sous la pluie',xp:150,d:'easy'},
+    {id:'ab8',name:'Faire une randonnée de nuit',xp:250,d:'hard'},
+    {id:'ab9',name:'Participer à un tournoi de pétanque',xp:200,d:'easy'},
+    {id:'ab10',name:'Passer une journée entière sans écran',xp:300,d:'hard'},
+    {id:'ab11',name:'Faire du bénévolat une journée',xp:300,d:'easy'},
+    {id:'ab12',name:"Faire du surf à l'aube",xp:300,d:'hard'},
+    {id:'ab13',name:'Pêcher un poisson',xp:100,d:'easy'},
+    {id:'ab14',name:"Prendre un cours d'équitation",xp:150,d:'easy'},
+    {id:'ab15',name:'Naviguer une journée en voilier',xp:200,d:'hard'},
+    {id:'ab16',name:"Faire un cours d'escrime",xp:150,d:'easy'},
+    {id:'ab17',name:'Cours de yoga à 7h sur une plage',xp:200,d:'hard'},
+    {id:'ab18',name:'Apprendre le kick-up en surf skate',xp:200,d:'hard'},
+    {id:'ab19',name:'Prendre un cours de surf',xp:200,d:'easy'},
+  ]},
+]},
+
+legendary:{label:'Quêtes Légendaires',navId:'nb-legendary',groups:[
+  {id:'gl1',icon:'🗾',color:'#EF476F',name:'Traverser le Japon autrement',
+   sub:'Seul. Sans itinéraire. Photographier 100 personnes.',reward:'🏆 Le Flâneur',
+   quests:[
+    {id:'l1',name:'Acheter le billet Japon',xp:500,d:'hard'},
+    {id:'l2',name:'Partir sans itinéraire fixe',xp:500,d:'boss'},
+    {id:'l3',name:'Photographier 100 personnes au Japon',xp:500,d:'boss'},
+  ]},
+  {id:'gl2',icon:'📕',color:'#9B5DE5',name:'Le Carnet Rouge',
+   sub:'1 an · 1 photo + 1 rencontre + 1 réflexion par semaine',reward:'🏆 Chroniqueur de sa vie',
+   quests:[
+    {id:'l4',name:'Acheter le carnet',xp:50,d:'easy'},
+    {id:'l5',name:'Tenir 1 mois sans interruption',xp:200,d:'hard'},
+    {id:'l6',name:'Tenir 6 mois',xp:400,d:'boss'},
+    {id:'l7',name:'Tenir 1 an complet',xp:800,d:'legend'},
+  ]},
+  {id:'gl3',icon:'🌲',color:'#06D6A0',name:'La Maison de la Forêt',
+   sub:'🔒 Disponible au niveau 40 — La quête finale',reward:'🏆 Fin du jeu',locked:true,
+   quests:[
+    {id:'l8',name:'Trouver ton métier',xp:2000,d:'legend',locked:true},
+    {id:'l9',name:'Construire ta liberté financière',xp:2000,d:'legend',locked:true},
+    {id:'l10',name:'Créer une vie choisie',xp:1000,d:'legend',locked:true},
+  ]},
+]},
+
+}
+
+/* BIOMES */
+const BIOMES=[
+  {id:'bm0',name:'Paris',ico:'🗼',default:true},
+  {id:'bm1',name:'Tenerife',ico:'🌋'},
+  {id:'bm2',name:'Barcelone',ico:'🇪🇸'},
+  {id:'bm3',name:'Sicile',ico:'🍋'},
+  {id:'bm4',name:'Maroc',ico:'🏜️'},
+  {id:'bm5',name:'Portugal',ico:'🇵🇹'},
+  {id:'bm6',name:'Japon',ico:'🗾'},
+  {id:'bm7',name:'Australie',ico:'🦘'},
+  {id:'bm8',name:'Nouvelle-Zélande',ico:'🥝'},
+];
+
+/* COLLECTIBLES */
+const COLLECTIBLES={
+  enc:[
+    {id:'ce1',name:'Le Surfeur',ico:'🏄'},
+    {id:'ce2',name:'Le Moine',ico:'🧘'},
+    {id:'ce3',name:'L\'Entrepreneur',ico:'💼'},
+    {id:'ce4',name:'Le Vieux Marin',ico:'⚓'},
+    {id:'ce5',name:'L\'Artiste',ico:'🎨'},
+    {id:'ce6',name:'Le Photographe de rue',ico:'📷'},
+    {id:'ce7',name:'Le Retraité qui a tout plaqué',ico:'🌅'},
+    {id:'ce8',name:'Le Voyageur solitaire',ico:'🎒'},
+    {id:'ce9',name:'L\'Expatrié',ico:'✈️'},
+    {id:'ce10',name:'Le Danseur',ico:'💃'},
+    {id:'ce11',name:'Le Musicien',ico:'🎸'},
+    {id:'ce12',name:'Le Guide de montagne',ico:'⛰️'},
+    {id:'ce13',name:'Le Nomade digital',ico:'💻'},
+    {id:'ce14',name:'Le Marin',ico:'⛵'},
+  ],
+  skills:[
+    {id:'cs1',name:'Handstand',ico:'🤸'},
+    {id:'cs2',name:'Salto',ico:'🔄'},
+    {id:'cs3',name:'Escalade',ico:'🧗'},
+    {id:'cs4',name:'Surf',ico:'🏄'},
+    {id:'cs5',name:'Voile',ico:'⛵'},
+    {id:'cs6',name:'Salsa',ico:'💃'},
+    {id:'cs7',name:'Guitare',ico:'🎸'},
+    {id:'cs8',name:'Photo de rue',ico:'📸'},
+    {id:'cs9',name:'Espagnol',ico:'🇪🇸'},
+    {id:'cs10',name:'Cuisine italienne',ico:'🍝'},
+    {id:'cs11',name:'Japonais',ico:'🇯🇵'},
+    {id:'cs12',name:'Danse sociale',ico:'🕺'},
+  ],
+};
+
+/* BOSS SECRETS */
+const BOSSES=[
+  {id:'bs1',ico:'🐉',name:'"J\'attends d\'être prêt"'},
+  {id:'bs2',ico:'🐉',name:'"Et si je faisais le mauvais choix ?"'},
+  {id:'bs3',ico:'🐉',name:'"Je vais avoir l\'air ridicule"'},
+  {id:'bs4',ico:'🐉',name:'"Je suis trop vieux pour ça"'},
+  {id:'bs5',ico:'🐉',name:'"Je le ferai plus tard"'},
+];
+
+/* MISSION DU DESTIN pool */
+const DESTIN_POOL=[
+  'Faire un compliment à une inconnue dans la rue','Aller dans un quartier de Paris que tu ne connais pas',
+  'Essayer un sport que tu n\'as jamais pratiqué','Aller à un meetup sans savoir exactement de quoi ça parle',
+  'Assister à une conférence aléatoire','Aller voir un spectacle dont tu ignores tout',
+  'Prendre une photo dont tu es vraiment fier','Inviter quelqu\'un à prendre un café',
+  'Visiter un musée parisien jamais visité','Manger dans un restaurant d\'un pays jamais testé',
+  'Faire une activité où tu seras le plus nul du groupe','Partir une journée sans téléphone',
+  'Parler à un inconnu dans un parc','Acheter un livre au hasard en librairie',
+  'Faire une randonnée urbaine de 15 km','Apprendre 5 mots d\'une langue inconnue',
+  'Assister à une séance de cinéma en VO','Cuisiner un plat d\'un pays jamais cuisiné',
+  'Écrire une lettre à quelqu\'un qui t\'a marqué','Faire du street photography pendant 1h',
+  'Rejoindre une session d\'improvisation théâtrale','Passer 2h dans une bibliothèque',
+  'Aller au marché et cuisiner avec ce que tu trouves','Faire du vélo dans Paris pendant 2h',
+  'Assister à un match de sport jamais vu en live',
+];
+
+/* STATS */
+const STATS=[
+  {key:'carriere',lbl:'Carrière',ico:'💼',color:'#118AB2',base:60},
+  {key:'sport',lbl:'Sport',ico:'⚔️',color:'#EF476F',base:80},
+  {key:'style',lbl:'Style',ico:'✨',color:'#9B5DE5',base:90},
+  {key:'voyage',lbl:'Voyage',ico:'🌍',color:'#06D6A0',base:70},
+  {key:'photo',lbl:'Photographie',ico:'📸',color:'#FF9F1C',base:20},
+  {key:'amour',lbl:'Amour',ico:'❤️',color:'#EF476F',base:30},
+  {key:'social',lbl:'Social',ico:'🍻',color:'#FFD166',base:55},
+  {key:'soi',lbl:'Connaissance de soi',ico:'🧠',color:'#73D2F4',base:80},
+];
+
+/* CONTRAT slots */
+const CONTRAT_CATS=[
+  {key:'carriere',lbl:'Carrière',ico:'💼'},
+  {key:'social',lbl:'Social',ico:'🍻'},
+  {key:'aventure',lbl:'Aventure',ico:'🌍'},
+  {key:'sport',lbl:'Sport',ico:'⚔️'},
+  {key:'libre',lbl:'Quête libre',ico:'🎲'},
+];
+
+/* ═══════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════ */
+let S={
+  done:{},          // questId -> timestamp
+  biomes:{bm0:true},// biomeId -> bool
+  collect:{},       // collectId -> bool
+  bosses:{},        // bossId -> bool
+  wish:{},          // questId -> bool (wishlist)
+  gmActive:false,
+  contrat:{},       // cat -> {questId,questName,done,week}
+  destin:{text:'',done:false,week:''},
+  legends:[],       // [{id,date,questName,xp,story}]
+  log:[],
+};
+
+function load(){try{const r=localStorage.getItem('allanrpg_v4');if(r){S=JSON.parse(r);if(!S.wish)S.wish={};}}catch(e){}}
+function save(){localStorage.setItem('allanrpg_v4',JSON.stringify(S));}
+
+/* ═══════════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════════ */
+function allQuests(){return Object.values(SECTIONS).flatMap(s=>s.groups.flatMap(g=>g.quests));}
+function xpEarned(){return allQuests().filter(q=>S.done[q.id]).reduce((a,q)=>a+q.xp,0);}
+function xpTotal(){return allQuests().reduce((a,q)=>a+q.xp,0);}
+function weekKey(){const d=new Date();return d.getFullYear()+'-W'+Math.ceil(((d-new Date(d.getFullYear(),0,1))/864e5+1)/7);}
+
+function pRing(pct,color){
+  const r=14,c=2*Math.PI*r,dash=(pct/100)*c;
+  return `<div class="pring"><svg width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="${r}" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="3"/><circle cx="18" cy="18" r="${r}" fill="none" stroke="${color}" stroke-width="3" stroke-dasharray="${dash} ${c}" stroke-linecap="round"/></svg><div class="pring-txt" style="color:${color}">${Math.round(pct)}%</div></div>`;
+}
+
+/* ═══════════════════════════════════════════════════
+   XP / LEVEL
+═══════════════════════════════════════════════════ */
+function refreshXP(){
+  const e=xpEarned(),t=xpTotal(),p=t>0?e/t*100:0;
+  document.getElementById('xpE').textContent=e.toLocaleString('fr');
+  document.getElementById('xpT').textContent=t.toLocaleString('fr');
+  document.getElementById('xpBar').style.width=p+'%';
+  document.getElementById('lvlNum').textContent=Math.max(1,Math.floor(e/500)+1);
+}
+
+/* ═══════════════════════════════════════════════════
+   NAV BADGES
+═══════════════════════════════════════════════════ */
+function refreshBadges(){
+  Object.entries(SECTIONS).forEach(([,sec])=>{
+    const el=document.getElementById(sec.navId);if(!el)return;
+    const qs=sec.groups.flatMap(g=>g.quests);
+    const d=qs.filter(q=>S.done[q.id]).length;
+    el.textContent=`${d}/${qs.length}`;
+    el.className='nbadge'+(d===qs.length?' ok':'');
+  });
+  // collectibles
+  const ac=[...COLLECTIBLES.enc,...COLLECTIBLES.skills];
+  const dc=ac.filter(c=>S.collect[c.id]).length;
+  const ec=document.getElementById('nb-collect');
+  if(ec){ec.textContent=`${dc}/${ac.length}`;ec.className='nbadge'+(dc===ac.length?' ok':'');}
+}
+
+/* ═══════════════════════════════════════════════════
+   ACCORDION
+═══════════════════════════════════════════════════ */
+const ACC_MAP={
+  mq:'acc-mq',humans:'acc-humans',improv:'acc-improv',creators:'acc-creators',
+  explorer:'acc-explorer',warrior:'acc-warrior',
+  charisma:'acc-charisma',sage:'acc-sage',absurd:'acc-absurd',legendary:'acc-legendary'
+};
+
+// Track which groups are open per section
+const openGroups=new Set();
+
+function renderAcc(sectionKey, diffFilter=null, wishOnly=false){
+  const containerId=ACC_MAP[sectionKey];
+  const container=document.getElementById(containerId);
+  if(!container)return;
+  const sec=SECTIONS[sectionKey];
+  if(!sec)return;
+
+  const pinnedIds=new Set(Object.values(S.contrat).map(c=>c&&c.questId).filter(Boolean));
+  const DIFF_MAP={easy:'🟢',hard:'🟠',boss:'🔴',legend:'🟣'};
+  const DIFF_LABEL={easy:'Facile',hard:'Inconfort',boss:'Boss fight',legend:'Légendaire'};
+  const DIFF_CLASS={easy:'diff-easy',hard:'diff-hard',boss:'diff-boss',legend:'diff-legend'};
+
+  container.innerHTML='';
+  sec.groups.forEach(group=>{
+    // Apply filter
+    let quests=group.quests;
+    if(diffFilter) quests=quests.filter(q=>q.d===diffFilter);
+    if(wishOnly)   quests=quests.filter(q=>S.wish&&S.wish[q.id]);
+    if(quests.length===0) return; // hide empty groups when filtering
+
+    const allQ=group.quests;
+    const done=allQ.filter(q=>S.done[q.id]).length;
+    const pct=allQ.length>0?done/allQ.length*100:0;
+    const isOpen=openGroups.has(group.id);
+    const hasPinned=allQ.some(q=>pinnedIds.has(q.id));
+
+    const el=document.createElement('div');
+    el.className='qgroup'+(isOpen?' open':'')+(hasPinned?' weekly-highlight':'');
+
+    const bossHTML=group.boss?`<div class="boss-inline"><div style="font-size:20px">${group.boss.icon}</div><div><div class="bi-lbl">⚠ Boss</div><div class="bi-name">${group.boss.name}</div></div></div>`:'';
+    const rewardHTML=group.reward?`<div class="reward-pill">${group.reward}</div>`:'';
+    const subHTML=group.sub?`<div style="font-size:11px;color:var(--text-dim);font-style:italic;margin-top:3px;">${group.sub}</div>`:'';
+
+    const qHTML=quests.map(q=>{
+      const isDone=!!S.done[q.id];
+      const isPinned=pinnedIds.has(q.id);
+      const isLocked=!!q.locked;
+      const isWished=!!(S.wish&&S.wish[q.id]);
+      const diff=q.d||'easy';
+      const diffBadge=`<span class="diff ${DIFF_CLASS[diff]}">${DIFF_MAP[diff]} ${DIFF_LABEL[diff]}</span>`;
+      return `<div class="qi${isDone?' done':''}${isPinned?' pinned':''}${isWished?' wished-item':''}"
+        data-qid="${q.id}" data-skey="${sectionKey}"
+        style="${isLocked?'opacity:.38;cursor:not-allowed':''}"
+      >
+        <div class="qchk">${isDone?'✓':''}</div>
+        <div class="qi-info">
+          <div class="qi-name">${q.name}</div>
+          <div class="qi-xp" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:3px;">
+            <span>+${q.xp} XP</span>
+            ${diffBadge}
+            ${isPinned?'<span style="color:var(--gold);font-size:10px;">⭐ Contrat</span>':''}
+            ${isLocked?'<span style="font-size:10px">🔒 Niveau 40</span>':''}
+          </div>
+        </div>
+        ${!isLocked?`<button class="wish-btn${isWished?' wished':''}" data-wid="${q.id}" data-wskey="${sectionKey}" title="${isWished?'Retirer des favoris':'Ajouter aux favoris'}">⭐</button>`:''}
+      </div>`;
+    }).join('');
+
+    el.innerHTML=`
+      <div class="qgh" data-gid="${group.id}">
+        <div class="qg-icon" style="background:${group.color}20">${group.icon}</div>
+        <div class="qg-info">
+          <div class="qg-name">${group.name}</div>
+          <div class="qg-sub">${done}/${allQ.length} quêtes · ${Math.round(pct)}%${group.locked?' · 🔒':''}${subHTML}</div>
+        </div>
+        <div class="qg-meta">
+          ${pRing(pct,group.color)}
+          <div class="chev">▾</div>
+        </div>
+      </div>
+      <div class="qgbody${isOpen?' open':''}" id="body-${group.id}">
+        <div class="qginner">
+          ${bossHTML}
+          ${qHTML}
+          ${rewardHTML}
+        </div>
+      </div>`;
+
+    el.querySelector('.qgh').addEventListener('click',()=>toggleGroup(group.id,el));
+
+    // Quest item clicks
+    el.querySelectorAll('.qi').forEach(qi=>{
+      const qid=qi.dataset.qid;
+      const sk=qi.dataset.skey;
+      if(!qid||!sk)return;
+      const qObj=allQuests().find(x=>x.id===qid);
+      if(qObj&&!qObj.locked){
+        // Click on item (not wishlist btn) toggles quest
+        qi.addEventListener('click',(e)=>{
+          if(e.target.classList.contains('wish-btn'))return;
+          toggleQuest(qid,sk);
+        });
+      }
+    });
+
+    // Wishlist button clicks
+    el.querySelectorAll('.wish-btn').forEach(btn=>{
+      btn.addEventListener('click',(e)=>{
+        e.stopPropagation();
+        const wid=btn.dataset.wid;
+        const wsk=btn.dataset.wskey;
+        if(!S.wish)S.wish={};
+        S.wish[wid]=!S.wish[wid];
+        save();
+        renderAcc(wsk, diffFilter, wishOnly);
+        refreshWishBadge();
+      });
+    });
+
+    container.appendChild(el);
+  });
+}
+
+
+function toggleGroup(gid,el){
+  const body=document.getElementById('body-'+gid);
+  if(!body)return;
+  const isOpen=openGroups.has(gid);
+  if(isOpen){openGroups.delete(gid);}else{openGroups.add(gid);}
+  body.classList.toggle('open',!isOpen);
+  el.classList.toggle('open',!isOpen);
+}
+
+/* ═══════════════════════════════════════════════════
+   TOGGLE QUEST
+═══════════════════════════════════════════════════ */
+function toggleQuest(qid,skey){
+  const q=allQuests().find(x=>x.id===qid);
+  if(!q||q.locked)return;
+  const wasDone=!!S.done[qid];
+  if(!wasDone){
+    S.done[qid]=Date.now();
+    showToast(q);
+    addLog(`Quête accomplie : <span class="hi">${q.name}</span> <span class="ok">(+${q.xp} XP)</span>`);
+    // Add to Journal des Légendes if xp >= 300
+    if(q.xp>=300) addLegend(q);
+    // Mark contrat if pinned
+    Object.keys(S.contrat).forEach(cat=>{
+      if(S.contrat[cat]&&S.contrat[cat].questId===qid) S.contrat[cat].done=true;
+    });
+  }else{
+    delete S.done[qid];
+    addLog(`Quête rouverte : <span class="hi">${q.name}</span>`);
+    Object.keys(S.contrat).forEach(cat=>{
+      if(S.contrat[cat]&&S.contrat[cat].questId===qid) S.contrat[cat].done=false;
+    });
+  }
+  save();
+  // Re-render with current filters if any
+  const activeDiff=document.querySelector('.filter-btn.active[data-diff]');
+  const wishOnly=document.querySelector('.filter-btn.active[data-wish]');
+  renderAcc(skey, activeDiff?activeDiff.dataset.diff:null, !!wishOnly);
+  refreshXP();refreshBadges();refreshDashboard();
+  refreshWishBadge();
+  if(document.getElementById('s-dashboard').classList.contains('active')) refreshContrat();
+}
+
+/* ═══════════════════════════════════════════════════
+   CONTRAT HEBDOMADAIRE
+═══════════════════════════════════════════════════ */
+function refreshContrat(){
+  const container=document.getElementById('contratSlots');
+  const bonus=document.getElementById('contratBonus');
+  if(!container)return;
+  const wk=weekKey();
+  container.innerHTML='';
+  let allDone=0,total=0;
+  CONTRAT_CATS.forEach(cat=>{
+    const entry=S.contrat[cat.key];
+    const isFilled=entry&&entry.week===wk&&entry.questId;
+    const isDone=isFilled&&S.done[entry&&entry.questId];
+    if(isFilled)total++;
+    if(isDone)allDone++;
+    const slot=document.createElement('div');
+    slot.className='contrat-slot'+(isFilled?' filled':'')+(isDone?' done-slot':'');
+    slot.innerHTML=`<span class="cs-ico">${cat.ico}</span><span><strong>${cat.lbl}</strong>${isFilled?`<span class="cs-label">${entry.questName.substring(0,28)}${entry.questName.length>28?'…':''}</span>`:''}</span>`;
+    slot.title=isFilled?entry.questName:'Clique pour choisir une quête';
+    slot.addEventListener('click',()=>pickContrat(cat.key,cat.lbl,wk));
+    container.appendChild(slot);
+  });
+  const allComplete=total===CONTRAT_CATS.length&&allDone===CONTRAT_CATS.length;
+  bonus.textContent=allComplete?'🎉 Contrat accompli ! Bonus +500 XP débloqué cette semaine.':total>0?`${allDone}/${CONTRAT_CATS.length} quêtes du contrat accomplies.`:'Clique sur chaque catégorie pour choisir tes quêtes de la semaine.';
+}
+
+function pickContrat(catKey,catLbl,wk){
+  // Build a list of non-done quests from relevant sections
+  const relevant=allQuests().filter(q=>!S.done[q.id]&&!q.locked);
+  if(!relevant.length)return alert('Toutes les quêtes sont accomplies !');
+  // Pick random 5 suggestions
+  const shuffled=[...relevant].sort(()=>Math.random()-.5).slice(0,8);
+  const names=shuffled.map(q=>`${q.name} (+${q.xp} XP)`);
+  const choice=prompt(`Choisir une quête pour la catégorie "${catLbl}" :\n\n${names.map((n,i)=>`${i+1}. ${n}`).join('\n')}\n\nEntre le numéro (1-${names.length}) :`);
+  const idx=parseInt(choice)-1;
+  if(isNaN(idx)||idx<0||idx>=shuffled.length)return;
+  const chosen=shuffled[idx];
+  S.contrat[catKey]={questId:chosen.id,questName:chosen.name,done:!!S.done[chosen.id],week:wk};
+  save();
+  refreshContrat();
+  // Re-render current active section if accordion is showing
+  const activePanel=document.querySelector('.panel.active');
+  if(activePanel){
+    const pid=activePanel.id.replace('s-','');
+    if(ACC_MAP[pid])renderAcc(pid);
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   MISSION DU DESTIN
+═══════════════════════════════════════════════════ */
+function rollDestin(){
+  const dice=document.getElementById('destinDice');
+  const wk=weekKey();
+  dice.classList.add('rolling');
+  setTimeout(()=>{
+    dice.classList.remove('rolling');
+    if(S.destin.week===wk&&S.destin.text){
+      // Already rolled this week
+      document.getElementById('destinText').textContent=S.destin.text;
+      document.getElementById('destinSub').textContent='Mission de cette semaine. Tu peux la relancer si tu veux.';
+    } else {
+      const mission=DESTIN_POOL[Math.floor(Math.random()*DESTIN_POOL.length)];
+      S.destin={text:mission,done:false,week:wk};
+      save();
+    }
+    renderDestin();
+  },650);
+}
+
+function renderDestin(){
+  const wk=weekKey();
+  const txtEl=document.getElementById('destinText');
+  const subEl=document.getElementById('destinSub');
+  const btn=document.getElementById('destinDoneBtn');
+  if(!txtEl)return;
+  if(S.destin.week===wk&&S.destin.text){
+    txtEl.textContent=S.destin.text;
+    subEl.textContent=S.destin.done?'✅ Mission accomplie cette semaine !':'Lance le dé pour une nouvelle mission ou accomplis celle-ci.';
+    btn.style.display='block';
+    btn.textContent=S.destin.done?'✓ Accomplie':'✓ Marquer accomplie';
+    btn.className='destin-btn'+(S.destin.done?' done-btn':'');
+  }else{
+    txtEl.textContent='Lance le dé pour recevoir ta mission de la semaine...';
+    subEl.textContent='Chaque semaine, une mission aléatoire générée par le jeu.';
+    btn.style.display='none';
+  }
+}
+
+function completeDestin(){
+  const wk=weekKey();
+  if(S.destin.week!==wk||!S.destin.text)return;
+  S.destin.done=!S.destin.done;
+  if(S.destin.done){
+    showToast({name:S.destin.text,xp:200});
+    addLog(`Mission du Destin accomplie : <span class="hi">${S.destin.text}</span> <span class="ok">(+200 XP)</span>`);
+  }
+  save();
+  renderDestin();
+}
+
+/* ═══════════════════════════════════════════════════
+   DASHBOARD
+═══════════════════════════════════════════════════ */
+function refreshDashboard(){
+  // Stats tiles
+  const sg=document.getElementById('dashStats');
+  if(sg){
+    sg.innerHTML='';
+    STATS.forEach(st=>{
+      const t=document.createElement('div');
+      t.className='stat-tile';
+      t.innerHTML=`<div class="st-icon">${st.ico}</div><div class="st-lbl">${st.lbl}</div><div class="st-val" style="color:${st.color}">${st.base}%</div><div class="st-bar"><div class="st-fill" style="width:${st.base}%;background:${st.color}"></div></div>`;
+      sg.appendChild(t);
+    });
+  }
+  // Guild progress bars
+  const gp=document.getElementById('guildProgress');
+  if(gp){
+    gp.innerHTML='';
+    Object.entries(SECTIONS).forEach(([,sec])=>{
+      const qs=sec.groups.flatMap(g=>g.quests);
+      const d=qs.filter(q=>S.done[q.id]).length;
+      const t=qs.length,p=t>0?Math.round(d/t*100):0;
+      const color=sec.groups[0]?.color||'#888';
+      const r=document.createElement('div');
+      r.style.cssText='display:flex;align-items:center;gap:12px;';
+      r.innerHTML=`<div style="width:140px;font-size:12px;color:var(--text-dim);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sec.label}</div><div style="flex:1;height:5px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden"><div style="height:100%;width:${p}%;background:${color};border-radius:3px;transition:width 1s"></div></div><div style="width:32px;font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim)">${p}%</div>`;
+      gp.appendChild(r);
+    });
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   BIOMES
+═══════════════════════════════════════════════════ */
+function renderBiomes(){
+  const g=document.getElementById('biomesGrid');
+  if(!g)return;
+  g.innerHTML=BIOMES.map(b=>{
+    const unlocked=!!S.biomes[b.id]||b.default;
+    return `<div class="biome${unlocked?' unlocked':''}" onclick="toggleBiome('${b.id}','${b.name}')"><div class="biome-ico">${b.ico}</div><div class="biome-name">${b.name}</div></div>`;
+  }).join('');
+}
+
+function toggleBiome(id,name){
+  if(id==='bm0')return; // Paris always unlocked
+  S.biomes[id]=!S.biomes[id];
+  if(S.biomes[id]){
+    showToast({name:`Biome débloqué : ${name}`,xp:300});
+    addLog(`Biome débloqué : <span class="hi">${name}</span> <span class="ok">(+300 XP)</span>`);
+  }
+  save();renderBiomes();
+}
+
+/* ═══════════════════════════════════════════════════
+   COLLECTIBLES
+═══════════════════════════════════════════════════ */
+function renderCollectibles(){
+  renderColGroup('col-enc',COLLECTIBLES.enc);
+  renderColGroup('col-skills',COLLECTIBLES.skills);
+}
+function renderColGroup(cid,items){
+  const el=document.getElementById(cid);
+  if(!el)return;
+  el.innerHTML=items.map(it=>`<div class="col-item${S.collect[it.id]?' found':''}" onclick="toggleCollect('${it.id}','${it.name.replace(/'/g,"\\'")}','${it.ico}')"><div class="col-ico">${it.ico}</div><div class="col-name">${it.name}</div></div>`).join('');
+}
+function toggleCollect(id,name,ico){
+  S.collect[id]=!S.collect[id];
+  if(S.collect[id]){showToast({name:`${ico} ${name}`,xp:50});addLog(`Collectible : <span class="hi">${ico} ${name}</span> <span class="ok">(+50 XP)</span>`);}
+  save();renderCollectibles();refreshBadges();
+}
+
+/* ═══════════════════════════════════════════════════
+   BOSS SECRETS
+═══════════════════════════════════════════════════ */
+function renderBosses(){
+  const g=document.getElementById('bsGrid');
+  if(!g)return;
+  g.innerHTML=BOSSES.map(b=>`<div class="bs-item${S.bosses[b.id]?' defeated':''}" onclick="toggleBoss('${b.id}','${b.name.replace(/'/g,"\\'")}')"><div class="bs-ico">${b.ico}</div><div class="bs-name">${b.name}</div><div class="bs-act">${S.bosses[b.id]?'✓ Vaincu':'Cliquer pour vaincre'}</div></div>`).join('');
+}
+function toggleBoss(id,name){
+  S.bosses[id]=!S.bosses[id];
+  if(S.bosses[id]){showToast({name:`Boss vaincu : ${name}`,xp:300});addLog(`Boss secret vaincu : <span class="hi">${name}</span>`);}
+  save();renderBosses();
+}
+
+/* ═══════════════════════════════════════════════════
+   GM TOGGLE
+═══════════════════════════════════════════════════ */
+function toggleGM(){
+  S.gmActive=!S.gmActive;save();
+  document.getElementById('gmToggle').classList.toggle('on',S.gmActive);
+  document.getElementById('weeklySection')&&(document.getElementById('weeklySection').style.display=S.gmActive?'block':'none');
+}
+
+/* ═══════════════════════════════════════════════════
+   JOURNAL DES LÉGENDES
+═══════════════════════════════════════════════════ */
+function addLegend(quest){
+  const id='leg-'+Date.now();
+  const now=new Date();
+  const date=now.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+  S.legends.unshift({id,date,questName:quest.name,xp:quest.xp,story:''});
+  save();renderLegends();
+}
+
+function renderLegends(){
+  const list=document.getElementById('legendsList');
+  const empty=document.getElementById('legendsEmpty');
+  if(!list)return;
+  list.innerHTML='';
+  if(!S.legends||S.legends.length===0){if(empty)empty.style.display='block';return;}
+  if(empty)empty.style.display='none';
+  S.legends.forEach(leg=>{
+    const div=document.createElement('div');
+    div.className='legend-entry';
+    div.innerHTML=`
+      <div class="le-date">📅 ${leg.date} <span class="xp-badge">+${leg.xp} XP</span></div>
+      <div class="le-quest">🏆 ${leg.questName}</div>
+      ${leg.story?`<div class="le-story">${leg.story.replace(/\n/g,'<br>')}</div>`:''}
+      <textarea class="le-story-input" placeholder="Raconte cette aventure en quelques mots… Ce que tu ressentais. Ce qui s'est passé. Ce que tu gardes." data-lid="${leg.id}">${leg.story||''}</textarea>
+      <button class="le-edit-btn" onclick="saveLegendStory('${leg.id}',this)">💾 Sauvegarder</button>
+    `;
+    // Auto-save on blur
+    const ta=div.querySelector('textarea');
+    ta.addEventListener('blur',()=>saveLegendStoryById(leg.id,ta.value));
+    list.appendChild(div);
+  });
+}
+
+function saveLegendStory(id,btn){
+  const ta=btn.previousElementSibling;
+  saveLegendStoryById(id,ta.value);
+  btn.textContent='✓ Sauvegardé';
+  setTimeout(()=>btn.textContent='💾 Sauvegarder',2000);
+}
+
+function saveLegendStoryById(id,text){
+  const leg=S.legends.find(l=>l.id===id);
+  if(leg){leg.story=text;save();}
+}
+
+/* ═══════════════════════════════════════════════════
+   LOG
+═══════════════════════════════════════════════════ */
+function addLog(msg){
+  if(!S.log)S.log=[];
+  const now=new Date();
+  const t=now.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})+' '+now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  S.log.unshift({t,msg});
+  if(S.log.length>200)S.log.pop();
+  renderLog();
+}
+function renderLog(){
+  const list=document.getElementById('logList');
+  const empty=document.getElementById('logEmpty');
+  if(!list)return;
+  const old=list.querySelectorAll('.log-e');old.forEach(e=>e.remove());
+  if(!S.log||!S.log.length){if(empty)empty.style.display='block';return;}
+  if(empty)empty.style.display='none';
+  S.log.forEach(e=>{const d=document.createElement('div');d.className='log-e';d.innerHTML=`<span class="log-t">${e.t}</span><span class="log-m">${e.msg}</span>`;list.appendChild(d);});
+}
+function clearLog(){if(confirm('Effacer le journal ?')){S.log=[];save();renderLog();}}
+
+/* ═══════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════ */
+function showToast(q){
+  document.querySelectorAll('.toast').forEach(t=>t.remove());
+  const t=document.createElement('div');t.className='toast';
+  t.innerHTML=`<div class="t-ico">🏆</div><div><div class="t-lbl">✦ Accomplie</div><div class="t-name">${q.name}</div><div class="t-xp">+${q.xp} XP</div></div>`;
+  document.body.appendChild(t);
+  setTimeout(()=>{t.style.transition='all .4s ease';t.style.opacity='0';t.style.transform='translateY(20px)';setTimeout(()=>t.remove(),400);},3200);
+}
+
+
+/* ═══════════════════════════════════════════════════
+   EXPORT / IMPORT
+═══════════════════════════════════════════════════ */
+function buildExportStats(){
+  const el=document.getElementById('exportStats');
+  if(!el)return;
+  const earned=xpEarned(),total=xpTotal();
+  const completedList=allQuests().filter(q=>S.done[q.id]);
+  const biomeCount=Object.values(S.biomes).filter(Boolean).length;
+  const collectCount=[...COLLECTIBLES.enc,...COLLECTIBLES.skills].filter(c=>S.collect[c.id]).length;
+  const legendCount=S.legends?S.legends.length:0;
+  const logCount=S.log?S.log.length:0;
+  el.innerHTML=`
+    <div class="sl-stat"><div class="sl-stat-ico">⚡</div><div class="sl-stat-label">XP gagnés</div><div class="sl-stat-val" style="color:var(--sun)">${earned.toLocaleString('fr')} / ${total.toLocaleString('fr')}</div></div>
+    <div class="sl-stat"><div class="sl-stat-ico">✅</div><div class="sl-stat-label">Quêtes accomplies</div><div class="sl-stat-val" style="color:var(--ocean)">${completedList.length}</div></div>
+    <div class="sl-stat"><div class="sl-stat-ico">🌍</div><div class="sl-stat-label">Biomes débloqués</div><div class="sl-stat-val" style="color:var(--sky-l)">${biomeCount}</div></div>
+    <div class="sl-stat"><div class="sl-stat-ico">💎</div><div class="sl-stat-label">Collectibles trouvés</div><div class="sl-stat-val" style="color:var(--lav-l)">${collectCount}</div></div>
+    <div class="sl-stat"><div class="sl-stat-ico">📖</div><div class="sl-stat-label">Entrées dans les Légendes</div><div class="sl-stat-val" style="color:var(--coral-l)">${legendCount}</div></div>
+    <div class="sl-stat"><div class="sl-stat-ico">📜</div><div class="sl-stat-label">Entrées dans le journal</div><div class="sl-stat-val" style="color:var(--text-mid)">${logCount}</div></div>
+  `;
+}
+
+function exportSave(){
+  const completedList=allQuests()
+    .filter(q=>S.done[q.id])
+    .map(q=>({id:q.id,name:q.name,xp:q.xp,completedAt:new Date(S.done[q.id]).toISOString()}));
+
+  const exportData={
+    version:'allanrpg_v4',
+    exportedAt:new Date().toISOString(),
+    xp:xpEarned(),
+    xpTotal:xpTotal(),
+    level:Math.max(1,Math.floor(xpEarned()/500)+1),
+    completedQuests:completedList,
+    biomes:S.biomes,
+    collectibles:S.collect,
+    bosses:S.bosses,
+    gmActive:S.gmActive,
+    contrat:S.contrat,
+    destin:S.destin,
+    wishlist:S.wish||{},
+    legends:S.legends||[],
+    journal:S.log||[],
+  };
+
+  const blob=new Blob([JSON.stringify(exportData,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  const d=new Date();
+  const dateStr=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  a.download=`allan-rpg-${dateStr}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  const fb=document.getElementById('exportFeedback');
+  if(fb){fb.textContent=`✓ Fichier téléchargé — ${completedList.length} quêtes · ${xpEarned().toLocaleString('fr')} XP sauvegardés.`;fb.className='sl-feedback ok';}
+}
+
+function handleImport(event){
+  const file=event.target.files[0];
+  const fb=document.getElementById('importFeedback');
+  if(!file){return;}
+  if(!file.name.endsWith('.json')&&file.type!=='application/json'){
+    if(fb){fb.textContent='❌ Format invalide. Sélectionne un fichier .json exporté depuis ce RPG.';fb.className='sl-feedback err';}
+    return;
+  }
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const data=JSON.parse(e.target.result);
+      // Validate it's our format
+      if(!data.version||!data.version.startsWith('allanrpg')){
+        if(fb){fb.textContent='❌ Ce fichier ne semble pas être une sauvegarde Allan RPG.';fb.className='sl-feedback err';}
+        return;
+      }
+      if(!confirm(`Importer cette sauvegarde ?
+
+• ${(data.completedQuests||[]).length} quêtes accomplies
+• ${data.xp||0} XP
+• ${(data.legends||[]).length} légendes
+• ${(data.journal||[]).length} entrées journal
+
+Cela remplacera ta progression actuelle.`)){
+        // Reset file input
+        event.target.value='';
+        return;
+      }
+      // Rebuild state from import
+      S={
+        done:{},
+        biomes:data.biomes||{bm0:true},
+        collect:data.collectibles||{},
+        bosses:data.bosses||{},
+        gmActive:data.gmActive||false,
+        wish:data.wishlist||{},
+        contrat:data.contrat||{},
+        destin:data.destin||{},
+        legends:data.legends||[],
+        log:data.journal||[],
+      };
+      // Rebuild done map from completedQuests array
+      (data.completedQuests||[]).forEach(q=>{
+        S.done[q.id]=new Date(q.completedAt).getTime()||Date.now();
+      });
+      save();
+      // Full refresh
+      refreshXP();refreshBadges();refreshDashboard();refreshContrat();
+      renderLog();renderLegends();renderDestin();
+      document.getElementById('gmToggle')?.classList.toggle('on',S.gmActive);
+      buildExportStats();
+      // Re-render any open accordion
+      const activePanel=document.querySelector('.panel.active');
+      if(activePanel){const pid=activePanel.id.replace('s-','');if(ACC_MAP[pid])renderAcc(pid);}
+      const count=(data.completedQuests||[]).length;
+      if(fb){fb.textContent=`✓ Sauvegarde importée avec succès — ${count} quêtes · ${data.xp||0} XP restaurés.`;fb.className='sl-feedback ok';}
+      event.target.value='';
+    }catch(err){
+      if(fb){fb.textContent="❌ Erreur de lecture du fichier. Vérifie qu'il n'est pas corrompu.";fb.className="sl-feedback err";}
+      console.error(err);
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* ═══════════════════════════════════════════════════
+   FILTER BAR + WISHLIST
+═══════════════════════════════════════════════════ */
+const DIFF_FILTERS=[
+  {key:null,label:'Toutes'},
+  {key:'easy',label:'🟢 Facile'},
+  {key:'hard',label:'🟠 Inconfort'},
+  {key:'boss',label:'🔴 Boss fight'},
+  {key:'legend',label:'🟣 Légendaire'},
+];
+
+function renderFilterBar(sectionKey, containerId){
+  const bar=document.getElementById(containerId);
+  if(!bar)return;
+  const wishCount=Object.values(S.wish||{}).filter(Boolean).length;
+  bar.innerHTML='';
+
+  DIFF_FILTERS.forEach(f=>{
+    const btn=document.createElement('button');
+    btn.className='filter-btn'+(f.key===null?' active':'');
+    btn.textContent=f.label;
+    if(f.key)btn.dataset.diff=f.key;
+    btn.addEventListener('click',()=>{
+      bar.querySelectorAll('.filter-btn[data-diff]').forEach(b=>b.classList.remove('active'));
+      bar.querySelectorAll('.filter-btn:not([data-diff]):not([data-wish])').forEach(b=>b.classList.remove('active'));
+      if(f.key===null){
+        btn.classList.add('active');
+        bar.querySelectorAll('.filter-btn[data-wish]').forEach(b=>b.classList.remove('active'));
+        renderAcc(sectionKey,null,false);
+      }else{
+        btn.classList.add('active');
+        bar.querySelectorAll('.filter-btn[data-wish]').forEach(b=>b.classList.remove('active'));
+        renderAcc(sectionKey,f.key,false);
+      }
+    });
+    bar.appendChild(btn);
+  });
+
+  // Wishlist filter
+  const wbtn=document.createElement('button');
+  wbtn.className='filter-btn';
+  wbtn.dataset.wish='1';
+  wbtn.textContent=`⭐ Favoris${wishCount>0?' ('+wishCount+')':''}`;
+  wbtn.addEventListener('click',()=>{
+    const isActive=wbtn.classList.contains('active');
+    bar.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    if(!isActive){
+      wbtn.classList.add('active');
+      renderAcc(sectionKey,null,true);
+    }else{
+      bar.querySelector('.filter-btn:not([data-diff]):not([data-wish])').classList.add('active');
+      renderAcc(sectionKey,null,false);
+    }
+  });
+  bar.appendChild(wbtn);
+}
+
+function refreshWishBadge(){
+  // Update wishlist counts in all filter bars
+  const count=Object.values(S.wish||{}).filter(Boolean).length;
+  document.querySelectorAll('.filter-btn[data-wish]').forEach(btn=>{
+    btn.textContent=`⭐ Favoris${count>0?' ('+count+')':''}`;
+  });
+  // Update sidebar wish nav badge if exists
+  const el=document.getElementById('nb-wish');
+  if(el){el.textContent=count;el.className='nbadge'+(count>0?' ok':'');}
+}
+
+/* ═══════════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════
+   WISHLIST PAGE
+═══════════════════════════════════════════════════ */
+const DIFF_MAP_G={easy:'🟢',hard:'🟠',boss:'🔴',legend:'🟣'};
+const DIFF_LABEL_G={easy:'Facile',hard:'Inconfort',boss:'Boss fight',legend:'Légendaire'};
+const DIFF_CLASS_G={easy:'diff-easy',hard:'diff-hard',boss:'diff-boss',legend:'diff-legend'};
+
+function renderWishlist(){
+  const container=document.getElementById('wishlistContent');
+  if(!container)return;
+  const wished=allQuests().filter(q=>S.wish&&S.wish[q.id]&&!q.locked);
+  container.innerHTML='';
+
+  if(wished.length===0){
+    container.innerHTML=`<div class="empty" style="padding:60px 20px;">
+      <div style="font-size:48px;margin-bottom:14px;opacity:.4">⭐</div>
+      <div>Aucun favori pour l\'instant.<br>Clique sur l\'étoile ⭐ dans n\'importe quelle guilde.</div>
+    </div>`;
+    return;
+  }
+
+  // Group by section
+  Object.entries(SECTIONS).forEach(([skey,sec])=>{
+    const secWished=sec.groups.flatMap(g=>g.quests).filter(q=>S.wish&&S.wish[q.id]&&!q.locked);
+    if(!secWished.length)return;
+
+    const heading=document.createElement('div');
+    heading.className='ssub';
+    heading.textContent=sec.label;
+    container.appendChild(heading);
+
+    secWished.forEach(q=>{
+      const isDone=!!S.done[q.id];
+      const diff=q.d||'easy';
+      const div=document.createElement('div');
+      div.className='qi'+(isDone?' done':'');
+      div.style.background='rgba(244,196,48,.04)';
+      div.style.border='1px solid rgba(244,196,48,.15)';
+      div.style.borderRadius='var(--rs)';
+      div.style.marginBottom='4px';
+      div.innerHTML=`
+        <div class="qchk">${isDone?'✓':''}</div>
+        <div class="qi-info">
+          <div class="qi-name">${q.name}</div>
+          <div class="qi-xp" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:3px;">
+            <span>+${q.xp} XP</span>
+            <span class="diff ${DIFF_CLASS_G[diff]}">${DIFF_MAP_G[diff]} ${DIFF_LABEL_G[diff]}</span>
+          </div>
+        </div>
+        <button class="wish-btn wished" data-wid="${q.id}" data-wskey="${skey}" title="Retirer des favoris">⭐</button>
+      `;
+      // Toggle quest
+      div.addEventListener('click',(e)=>{
+        if(e.target.classList.contains('wish-btn'))return;
+        toggleQuest(q.id, skey);
+        setTimeout(renderWishlist, 50);
+      });
+      // Unwish
+      div.querySelector('.wish-btn').addEventListener('click',(e)=>{
+        e.stopPropagation();
+        S.wish[q.id]=false;
+        save();
+        renderWishlist();
+        refreshWishBadge();
+      });
+      container.appendChild(div);
+    });
+  });
+}
+
+// Sections that get a filter bar — map: sectionKey -> filterId DOM
+const FILTER_BARS={
+  creators:'creatorsFilter',
+  humans:'humansFilter',
+  improv:'improvFilter',
+  warrior:'warriorFilter',
+  sage:'sageFilter',
+  absurd:'absurdFilter',
+  legendary:'legendaryFilter',
+  charisma:'charismaFilter',
+  explorer:'explorerFilter',
+};
+
+function go(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(b=>b.classList.remove('active'));
+  const panel=document.getElementById('s-'+id);
+  if(panel)panel.classList.add('active');
+  document.querySelectorAll('.ni').forEach(b=>{if(b.getAttribute('onclick')===`go('${id}')`)b.classList.add('active');});
+  // Lazy render
+  if(ACC_MAP[id]){
+    // Inject filter bar container if section supports it
+    if(FILTER_BARS[id]){
+      const fbId=FILTER_BARS[id];
+      let fb=document.getElementById(fbId);
+      if(!fb){
+        fb=document.createElement('div');
+        fb.className='filter-bar';
+        fb.id=fbId;
+        const acc=document.getElementById(ACC_MAP[id]);
+        if(acc&&acc.parentNode) acc.parentNode.insertBefore(fb,acc);
+      }
+      renderFilterBar(id,fbId);
+    }
+    renderAcc(id);
+  }
+  if(id==='collectibles')renderCollectibles();
+  if(id==='bosses')renderBosses();
+  if(id==='explorer'){renderBiomes();renderFilterBar('explorer','explorerFilter');}
+  if(id==='legends')renderLegends();
+  if(id==='wishlist'){renderWishlist();refreshWishBadge();}
+  if(id==='dashboard'){refreshDashboard();refreshContrat();}
+  if(id==='saveload'){buildExportStats();}
+}
+
+/* ═══════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════ */
+function init(){
+  load();
+  refreshDashboard();
+  refreshXP();
+  refreshBadges();
+  renderLog();
+  renderLegends();
+  renderDestin();
+  // Expose weekly section based on GM state
+  const ws=document.getElementById('weeklySection');
+  if(ws)ws.style.display=S.gmActive?'block':'none';
+  document.getElementById('gmToggle')?.classList.toggle('on',S.gmActive);
+}
+
+init();
+</script>
+</body>
+</html>
