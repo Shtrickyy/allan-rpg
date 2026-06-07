@@ -93,10 +93,67 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .contrat-card::after{content:'⭐';position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:72px;opacity:.06;pointer-events:none;}
 .contrat-title{font-family:'Syne',sans-serif;font-weight:800;font-size:14px;color:var(--gold);letter-spacing:1px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
 .contrat-slots{display:flex;flex-wrap:wrap;gap:8px;}
-.contrat-slot{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:var(--rs);border:1px dashed rgba(244,196,48,.3);background:rgba(244,196,48,.04);font-size:13px;color:var(--text-mid);cursor:pointer;transition:all .2s;min-width:160px;}
+.contrat-slot{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--rs);border:1px dashed rgba(244,196,48,.3);background:rgba(244,196,48,.04);font-size:13px;color:var(--text-mid);cursor:pointer;transition:all .2s;width:100%;}
 .contrat-slot:hover{border-color:rgba(244,196,48,.5);background:rgba(244,196,48,.08);}
-.contrat-slot.filled{border-style:solid;border-color:rgba(244,196,48,.4);background:rgba(244,196,48,.1);color:var(--gold);}
-.contrat-slot.done-slot{border-color:rgba(6,214,160,.35);background:rgba(6,214,160,.08);color:var(--ocean);}
+.contrat-slot.filled{border-style:solid;border-color:rgba(244,196,48,.35);background:rgba(244,196,48,.08);color:var(--gold);}
+.contrat-slot.done-slot{border-style:solid;border-color:rgba(6,214,160,.35);background:rgba(6,214,160,.08);color:var(--ocean);}
+.contrat-slot.done-slot .cs-label{text-decoration:line-through;opacity:.7;}
+.cs-label{font-size:11px;color:var(--text-dim);display:block;margin-top:2px;font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;}
+.contrat-slot.filled .cs-label{color:inherit;opacity:.8;}
+.cs-remove{margin-left:auto;font-size:14px;opacity:0;transition:opacity .15s;color:var(--text-dim);padding:2px 4px;border-radius:4px;flex-shrink:0;}
+.contrat-slot.filled:hover .cs-remove{opacity:1;}
+.contrat-slot.filled:hover .cs-remove:hover{color:var(--coral-l);}
+.contrat-slots{display:flex;flex-direction:column;gap:6px;}
+
+/* Contrat picker modal */
+.cpicker-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:99998;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:fadeIn .2s ease;}
+.cpicker-modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);width:100%;max-width:540px;max-height:min(88vh,88dvh);display:flex;flex-direction:column;position:relative;}
+.cpicker-header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 14px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:1;border-radius:var(--r) var(--r) 0 0;flex-shrink:0;}
+.cpicker-title{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;display:flex;align-items:center;gap:8px;}
+.cpicker-close{background:none;border:none;color:var(--text-dim);font-size:18px;cursor:pointer;padding:4px 8px;border-radius:6px;line-height:1;transition:all .15s;}
+.cpicker-close:hover{color:var(--text);background:rgba(255,255,255,.07);}
+.cpicker-search{padding:10px 16px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.cpicker-search input{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border2);border-radius:var(--rs);padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
+.cpicker-search input:focus{border-color:rgba(244,196,48,.4);}
+.cpicker-list{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 12px 16px;flex:1;}
+.cpicker-section-lbl{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);padding:10px 4px 5px;}
+.cpicker-item{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--rs);cursor:pointer;transition:background .15s;margin-bottom:2px;border:1px solid transparent;}
+.cpicker-item:hover{background:rgba(255,255,255,.04);}
+.cpicker-item.selected{background:rgba(244,196,48,.1);border-color:rgba(244,196,48,.25);}
+.cpicker-item.is-done{opacity:.5;}
+.cpicker-check{width:22px;height:22px;border-radius:6px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.03);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;font-size:12px;}
+.cpicker-item.selected .cpicker-check{background:var(--gold);border-color:var(--gold);color:var(--bg);}
+.cpicker-item.is-done .cpicker-check{background:var(--ocean-d);border-color:var(--ocean);color:var(--bg);}
+.cpicker-info{flex:1;min-width:0;}
+.cpicker-name{font-size:13.5px;color:var(--text);line-height:1.3;}
+.cpicker-item.is-done .cpicker-name{text-decoration:line-through;color:var(--text-dim);}
+.cpicker-meta{display:flex;align-items:center;gap:8px;margin-top:3px;flex-wrap:wrap;}
+.cpicker-guild{font-size:10px;color:var(--text-dim);}
+.cpicker-xp{font-family:'Space Mono',monospace;font-size:10px;color:var(--gold-d);}
+.cpicker-diff{font-size:10px;}
+.cpicker-footer{padding:12px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-shrink:0;}
+.cpicker-hint{font-size:12px;color:var(--text-dim);font-style:italic;}
+.cpicker-btn-confirm{padding:10px 22px;border-radius:var(--rs);background:linear-gradient(135deg,var(--gold-d),var(--sun));border:none;color:var(--bg);font-family:'Space Mono',monospace;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;}
+.cpicker-btn-confirm:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(255,159,28,.4);}
+.cpicker-btn-confirm:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.cpicker-empty{text-align:center;padding:32px 16px;color:var(--text-dim);font-style:italic;font-size:13px;}
+
+/* Guild accordion rows inside cpicker */
+.cpicker-guild-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--rs);cursor:pointer;transition:background .15s;border:1px solid transparent;margin-bottom:4px;}
+.cpicker-guild-row:hover{background:rgba(255,255,255,.04);border-color:var(--border);}
+.cpicker-guild-row.open{background:rgba(255,255,255,.03);border-color:var(--border2);}
+.cpicker-guild-ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.cpicker-guild-info{flex:1;min-width:0;}
+.cpicker-guild-name{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--text);}
+.cpicker-guild-count{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);margin-top:2px;}
+.cpicker-guild-chev{font-size:12px;color:var(--text-dim);transition:transform .25s;flex-shrink:0;}
+.cpicker-guild-row.open .cpicker-guild-chev{transform:rotate(180deg);}
+/* Selected guild highlight */
+.cpicker-guild-row.has-selected{border-color:rgba(244,196,48,.3);background:rgba(244,196,48,.04);}
+/* Quest list inside open guild */
+.cpicker-guild-quests{overflow:hidden;max-height:0;transition:max-height .3s cubic-bezier(.4,0,.2,1);}
+.cpicker-guild-quests.open{max-height:2000px;}
+.cpicker-guild-quests-inner{padding:4px 4px 10px 12px;border-left:2px solid var(--border);margin-left:24px;margin-bottom:4px;}
 .cs-ico{font-size:16px;}
 .cs-label{font-size:11px;font-family:'Space Mono',monospace;opacity:.6;display:block;margin-top:2px;}
 .contrat-bonus{font-family:'Space Mono',monospace;font-size:10px;color:var(--gold-d);margin-top:12px;}
@@ -504,16 +561,30 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   /* Bouton moment de vie — masqué en mobile
      (accessible via les boutons inline dans les panels) */
 
-  /* Modal: explicitly visible on mobile, override any inherited display:none */
+  /* Memory modal: explicitly visible on mobile */
   #memModalBackdrop[style*="flex"],
   #memModalBackdrop.open {
     display:flex!important;
   }
-  /* Modal body scrollable on small screens */
   .mem-modal {
     max-height:85dvh;
-    max-height:85vh; /* fallback for browsers without dvh */
+    max-height:85vh;
   }
+
+  /* Cpicker modal: visible on mobile, full-screen feel */
+  #cpickerBackdrop[style*="flex"] {
+    display:flex!important;
+    padding:8px;
+  }
+  .cpicker-modal {
+    max-height:min(92vh,92dvh);
+    border-radius:var(--r);
+  }
+  .cpicker-name { font-size:13px; }
+  .cpicker-item { padding:12px 10px; }
+
+  /* Contrat slots: stack on mobile */
+  .contrat-slots { flex-direction:column; }
 }
 /* Desktop : drawers jamais visibles */
 @media(min-width:769px){
@@ -1553,50 +1624,286 @@ function toggleQuest(qid,skey){
 /* ═══════════════════════════════════════════════════
    CONTRAT HEBDOMADAIRE
 ═══════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════
+   CONTRAT HEBDOMADAIRE — Picker modal (no prompt/alert)
+═══════════════════════════════════════════════════ */
+
 function refreshContrat(){
   const container=document.getElementById('contratSlots');
   const bonus=document.getElementById('contratBonus');
   if(!container)return;
   const wk=weekKey();
   container.innerHTML='';
-  let allDone=0,total=0;
+  let allDone=0, total=0;
   CONTRAT_CATS.forEach(cat=>{
     const entry=S.contrat[cat.key];
     const isFilled=entry&&entry.week===wk&&entry.questId;
-    const isDone=isFilled&&S.done[entry&&entry.questId];
+    const isDone=isFilled&&!!S.done[entry.questId];
     if(isFilled)total++;
     if(isDone)allDone++;
+
     const slot=document.createElement('div');
     slot.className='contrat-slot'+(isFilled?' filled':'')+(isDone?' done-slot':'');
-    slot.innerHTML=`<span class="cs-ico">${cat.ico}</span><span><strong>${cat.lbl}</strong>${isFilled?`<span class="cs-label">${entry.questName.substring(0,28)}${entry.questName.length>28?'…':''}</span>`:''}</span>`;
-    slot.title=isFilled?entry.questName:'Clique pour choisir une quête';
-    slot.addEventListener('click',()=>pickContrat(cat.key,cat.lbl,wk));
+
+    if(isFilled){
+      const qName=entry.questName||'';
+      slot.innerHTML=`
+        <span class="cs-ico">${cat.ico}</span>
+        <span style="flex:1;min-width:0">
+          <strong style="font-size:12px;font-family:'Space Mono',monospace;letter-spacing:.5px">${cat.lbl}</strong>
+          <span class="cs-label">${qName}</span>
+        </span>
+        ${isDone?'<span style="font-size:14px">✓</span>':''}
+        <span class="cs-remove" title="Retirer cette quête" onclick="_removeContrat(event,'${cat.key}')">✕</span>`;
+    } else {
+      slot.innerHTML=`
+        <span class="cs-ico">${cat.ico}</span>
+        <span style="flex:1">
+          <strong style="font-size:12px;font-family:'Space Mono',monospace;letter-spacing:.5px">${cat.lbl}</strong>
+          <span class="cs-label" style="color:var(--text-dim)">Choisir une quête…</span>
+        </span>
+        <span style="font-size:18px;color:var(--text-dim);opacity:.5">＋</span>`;
+    }
+
+    // Click on slot → open picker (not on the ✕ remove button)
+    slot.addEventListener('click', e=>{
+      if(e.target.classList.contains('cs-remove')||e.target.closest('.cs-remove'))return;
+      openCpicker(cat.key, cat.lbl, cat.ico, wk);
+    });
     container.appendChild(slot);
   });
+
   const allComplete=total===CONTRAT_CATS.length&&allDone===CONTRAT_CATS.length;
-  bonus.textContent=allComplete?'🎉 Contrat accompli ! Bonus +500 XP débloqué cette semaine.':total>0?`${allDone}/${CONTRAT_CATS.length} quêtes du contrat accomplies.`:'Clique sur chaque catégorie pour choisir tes quêtes de la semaine.';
+  bonus.textContent=allComplete
+    ?'🎉 Contrat accompli ! Bonus +500 XP débloqué cette semaine.'
+    :total>0
+      ?`${allDone}/${CONTRAT_CATS.length} quêtes accomplies cette semaine.`
+      :'Clique sur une catégorie pour choisir ta quête de la semaine.';
 }
 
-function pickContrat(catKey,catLbl,wk){
-  // Build a list of non-done quests from relevant sections
-  const relevant=allQuests().filter(q=>!S.done[q.id]&&!q.locked);
-  if(!relevant.length)return alert('Toutes les quêtes sont accomplies !');
-  // Pick random 5 suggestions
-  const shuffled=[...relevant].sort(()=>Math.random()-.5).slice(0,8);
-  const names=shuffled.map(q=>`${q.name} (+${q.xp} XP)`);
-  const choice=prompt(`Choisir une quête pour la catégorie "${catLbl}" :\n\n${names.map((n,i)=>`${i+1}. ${n}`).join('\n')}\n\nEntre le numéro (1-${names.length}) :`);
-  const idx=parseInt(choice)-1;
-  if(isNaN(idx)||idx<0||idx>=shuffled.length)return;
-  const chosen=shuffled[idx];
-  S.contrat[catKey]={questId:chosen.id,questName:chosen.name,done:!!S.done[chosen.id],week:wk};
+function _removeContrat(e, catKey){
+  e.stopPropagation();
+  delete S.contrat[catKey];
   save();
   refreshContrat();
-  // Re-render current active section if accordion is showing
+  // Re-render pinned quests in any open accordion
   const activePanel=document.querySelector('.panel.active');
-  if(activePanel){
-    const pid=activePanel.id.replace('s-','');
-    if(ACC_MAP[pid])renderAcc(pid);
+  if(activePanel){const pid=activePanel.id.replace('s-','');if(ACC_MAP[pid])renderAcc(pid);}
+}
+
+/* ─────────────────────────────────────────────────
+   CPICKER — custom quest picker modal
+   State held entirely in local vars (no globals needed)
+───────────────────────────────────────────────── */
+let _cpState = {catKey:null, catLbl:null, catIco:null, wk:null, selectedId:null};
+
+// Map questId → section label (for display in picker)
+function _questGuildLabel(questId){
+  for(const [key,sec] of Object.entries(SECTIONS)){
+    for(const grp of sec.groups){
+      if(grp.quests.some(q=>q.id===questId)) return sec.label;
+    }
   }
+  return '';
+}
+
+function openCpicker(catKey, catLbl, catIco, wk){
+  _cpState={catKey, catLbl, catIco, wk, selectedId:null};
+
+  // Pre-select existing entry if any
+  const existing=S.contrat[catKey];
+  if(existing&&existing.week===wk&&existing.questId){
+    _cpState.selectedId=existing.questId;
+  }
+
+  // Set header
+  document.getElementById('cpickerCatIco').textContent=catIco;
+  document.getElementById('cpickerCatLbl').textContent=catLbl;
+  document.getElementById('cpickerSearch').value='';
+  document.getElementById('cpickerConfirm').disabled=!_cpState.selectedId;
+  document.getElementById('cpickerHint').textContent=
+    _cpState.selectedId?'1 quête sélectionnée':'Sélectionne une quête';
+
+  _cpOpenGuild=null; // start with all guilds collapsed
+  _cpickerRenderList('');
+  document.getElementById('cpickerBackdrop').style.display='flex';
+  document.body.style.overflow='hidden';
+  setTimeout(()=>document.getElementById('cpickerSearch').focus(), 120);
+}
+
+function closeCpicker(){
+  document.getElementById('cpickerBackdrop').style.display='none';
+  document.body.style.overflow='';
+  _cpState={catKey:null,catLbl:null,catIco:null,wk:null,selectedId:null};
+  _cpOpenGuild=null;
+}
+
+function _cpickerBackdropClick(e){
+  if(e.target===document.getElementById('cpickerBackdrop'))closeCpicker();
+}
+
+function _cpickerFilter(){
+  const q=document.getElementById('cpickerSearch').value;
+  if(!q.trim()) _cpOpenGuild=null; // back to accordion when search cleared
+  _cpickerRenderList(q);
+}
+
+const DIFF_EMOJI={easy:'🟢',hard:'🟠',boss:'🔴',legend:'🟣'};
+
+// Which guild accordion is currently open in the cpicker (sectionKey string)
+let _cpOpenGuild = null;
+
+function _cpickerSetSelected(qid, currentFilter){
+  if(_cpState.selectedId===qid){
+    _cpState.selectedId=null;
+  } else {
+    _cpState.selectedId=qid;
+  }
+  const confirmBtn=document.getElementById('cpickerConfirm');
+  confirmBtn.disabled=!_cpState.selectedId;
+  document.getElementById('cpickerHint').textContent=
+    _cpState.selectedId?'1 quête sélectionnée — confirme ton choix':'Sélectionne une quête';
+  _cpickerRenderList(currentFilter);
+}
+
+function _cpickerRenderQuestItem(q, secLabel, filter){
+  const isDone=!!S.done[q.id];
+  const isSelected=_cpState.selectedId===q.id;
+  const item=document.createElement('div');
+  item.className='cpicker-item'+(isSelected?' selected':'')+(isDone?' is-done':'');
+  item.dataset.qid=q.id;
+  item.innerHTML=`
+    <div class="cpicker-check">${isSelected||isDone?'✓':''}</div>
+    <div class="cpicker-info">
+      <div class="cpicker-name">${q.name}</div>
+      <div class="cpicker-meta">
+        <span class="cpicker-xp">+${q.xp} XP</span>
+        ${q.d?`<span class="cpicker-diff">${DIFF_EMOJI[q.d]||''}</span>`:''}
+        ${isDone?'<span style="font-size:10px;color:var(--ocean)">✓ déjà fait</span>':''}
+      </div>
+    </div>`;
+  item.addEventListener('click',()=>_cpickerSetSelected(q.id, filter));
+  return item;
+}
+
+function _cpickerRenderList(filter){
+  const list=document.getElementById('cpickerList');
+  list.innerHTML='';
+  const needle=filter.toLowerCase().trim();
+  const isSearching=needle.length>0;
+
+  // ── SEARCH MODE: flat list, all guilds, filtered ──
+  if(isSearching){
+    let anyItem=false;
+    Object.entries(SECTIONS).forEach(([,sec])=>{
+      const quests=sec.groups.flatMap(g=>g.quests).filter(q=>
+        !q.locked && q.name.toLowerCase().includes(needle)
+      );
+      if(!quests.length)return;
+
+      const lbl=document.createElement('div');
+      lbl.className='cpicker-section-lbl';
+      lbl.textContent=sec.label;
+      list.appendChild(lbl);
+
+      quests.forEach(q=>{
+        list.appendChild(_cpickerRenderQuestItem(q, sec.label, filter));
+        anyItem=true;
+      });
+    });
+    if(!anyItem){
+      const empty=document.createElement('div');
+      empty.className='cpicker-empty';
+      empty.textContent=`Aucune quête trouvée pour "${filter}"`;
+      list.appendChild(empty);
+    }
+    return;
+  }
+
+  // ── ACCORDION MODE: guilds collapsed, one open at a time ──
+  // If the selected quest belongs to a guild and no guild is open, auto-open it
+  if(_cpState.selectedId && !_cpOpenGuild){
+    outer:for(const [key,sec] of Object.entries(SECTIONS)){
+      for(const grp of sec.groups){
+        if(grp.quests.some(q=>q.id===_cpState.selectedId)){
+          _cpOpenGuild=key;
+          break outer;
+        }
+      }
+    }
+  }
+
+  let anyGuild=false;
+  Object.entries(SECTIONS).forEach(([key,sec])=>{
+    const quests=sec.groups.flatMap(g=>g.quests).filter(q=>!q.locked);
+    if(!quests.length)return;
+    anyGuild=true;
+
+    const doneCount=quests.filter(q=>S.done[q.id]).length;
+    const hasSelected=quests.some(q=>q.id===_cpState.selectedId);
+    const isOpen=_cpOpenGuild===key;
+
+    // Guild color from first group
+    const gColor=sec.groups[0]?.color||'#9B5DE5';
+
+    // ── Guild row ──
+    const guildRow=document.createElement('div');
+    guildRow.className='cpicker-guild-row'+(isOpen?' open':'')+(hasSelected?' has-selected':'');
+
+    guildRow.innerHTML=`
+      <div class="cpicker-guild-ico" style="background:${gColor}22">${sec.groups[0]?.icon||'📋'}</div>
+      <div class="cpicker-guild-info">
+        <div class="cpicker-guild-name">${sec.label}</div>
+        <div class="cpicker-guild-count">${quests.length - doneCount} disponibles · ${doneCount} faites${hasSelected?' · <span style="color:var(--gold)">⭐ sélectionnée</span>':''}</div>
+      </div>
+      <div class="cpicker-guild-chev">▾</div>`;
+
+    guildRow.addEventListener('click',()=>{
+      // Toggle: close if already open, open otherwise
+      _cpOpenGuild = isOpen ? null : key;
+      _cpickerRenderList(''); // re-render accordion
+    });
+    list.appendChild(guildRow);
+
+    // ── Quest list (shown when open) ──
+    const questsWrap=document.createElement('div');
+    questsWrap.className='cpicker-guild-quests'+(isOpen?' open':'');
+
+    if(isOpen){
+      const inner=document.createElement('div');
+      inner.className='cpicker-guild-quests-inner';
+      quests.forEach(q=>{
+        inner.appendChild(_cpickerRenderQuestItem(q, sec.label, filter));
+      });
+      questsWrap.appendChild(inner);
+    }
+    list.appendChild(questsWrap);
+  });
+
+  if(!anyGuild){
+    const empty=document.createElement('div');
+    empty.className='cpicker-empty';
+    empty.textContent='Toutes les quêtes sont accomplies !';
+    list.appendChild(empty);
+  }
+}
+
+function _cpickerConfirm(){
+  if(!_cpState.selectedId||!_cpState.catKey)return;
+  const q=allQuests().find(x=>x.id===_cpState.selectedId);
+  if(!q)return;
+  S.contrat[_cpState.catKey]={
+    questId:q.id,
+    questName:q.name,
+    done:!!S.done[q.id],
+    week:_cpState.wk
+  };
+  save();
+  closeCpicker();
+  refreshContrat();
+  // Re-render pinned quests highlighting in open accordion
+  const activePanel=document.querySelector('.panel.active');
+  if(activePanel){const pid=activePanel.id.replace('s-','');if(ACC_MAP[pid])renderAcc(pid);}
 }
 
 /* ═══════════════════════════════════════════════════
@@ -2646,9 +2953,11 @@ function _renderAll() {
   renderLog();
   renderLegends();
   renderDestin();
+  refreshContrat();
   const ws = document.getElementById('weeklySection');
   if (ws) ws.style.display = S.gmActive ? 'block' : 'none';
   document.getElementById('gmToggle')?.classList.toggle('on', S.gmActive);
+  _refreshMemBadge();
 }
 
 // ── _dismissBootOverlay: fade then hide the boot screen ──
@@ -3088,5 +3397,25 @@ if (_swEnabled) {
   </div>
 </div>
 
+<!-- CONTRAT PICKER MODAL -->
+<div class="cpicker-backdrop" id="cpickerBackdrop" style="display:none" onclick="_cpickerBackdropClick(event)">
+  <div class="cpicker-modal" id="cpickerModal">
+    <div class="cpicker-header">
+      <div class="cpicker-title">
+        <span id="cpickerCatIco"></span>
+        <span id="cpickerCatLbl">Choisir une quête</span>
+      </div>
+      <button class="cpicker-close" onclick="closeCpicker()">✕</button>
+    </div>
+    <div class="cpicker-search">
+      <input type="text" id="cpickerSearch" placeholder="Rechercher une quête..." oninput="_cpickerFilter()" autocomplete="off">
+    </div>
+    <div class="cpicker-list" id="cpickerList"></div>
+    <div class="cpicker-footer">
+      <span class="cpicker-hint" id="cpickerHint">Sélectionne une quête</span>
+      <button class="cpicker-btn-confirm" id="cpickerConfirm" onclick="_cpickerConfirm()" disabled>Choisir</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
