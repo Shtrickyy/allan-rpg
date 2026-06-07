@@ -100,6 +100,11 @@ self.addEventListener('message', event => {
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
 
+  // Ignore non-http(s) requests (chrome-extension://, data:, blob:, etc.)
+  // Attempting to cache these causes "Request scheme unsupported" errors.
+  if (!event.request.url.startsWith('http://') &&
+      !event.request.url.startsWith('https://')) return;
+
   const url = new URL(event.request.url);
 
   // Never intercept external / API requests

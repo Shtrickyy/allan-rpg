@@ -390,8 +390,31 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .mem-card-btn.del:hover{color:var(--coral-l);border-color:rgba(239,71,111,.3);}
 
 /* Modal */
-.mem-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:8000;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px);animation:fadeIn .2s ease;}
-.mem-modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);width:100%;max-width:560px;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;}
+.mem-modal-backdrop{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.75);
+  /* Above everything: shell(z10), boot-overlay(z9999), toast(z9999) */
+  z-index:99999;
+  display:flex;align-items:center;justify-content:center;
+  padding:16px;
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  animation:fadeIn .2s ease;
+  /* Ensure it's in the normal stacking context, not clipped */
+  isolation:isolate;
+}
+.mem-modal{
+  background:var(--bg2);
+  border:1px solid var(--border2);
+  border-radius:var(--r);
+  width:100%;max-width:560px;
+  /* Mobile: leave room for keyboard and browser chrome */
+  max-height:min(90vh, 90dvh);
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  display:flex;flex-direction:column;
+  position:relative;z-index:1;
+}
 .mem-modal::-webkit-scrollbar{width:3px;}
 .mem-modal::-webkit-scrollbar-thumb{background:var(--border2);}
 .mem-modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 22px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:1;}
@@ -480,6 +503,17 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   .ni.active .ni-chev{transform:rotate(180deg);color:var(--sun);}
   /* Bouton moment de vie — masqué en mobile
      (accessible via les boutons inline dans les panels) */
+
+  /* Modal: explicitly visible on mobile, override any inherited display:none */
+  #memModalBackdrop[style*="flex"],
+  #memModalBackdrop.open {
+    display:flex!important;
+  }
+  /* Modal body scrollable on small screens */
+  .mem-modal {
+    max-height:85dvh;
+    max-height:85vh; /* fallback for browsers without dvh */
+  }
 }
 /* Desktop : drawers jamais visibles */
 @media(min-width:769px){
@@ -863,72 +897,6 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     <div class="sl-desc">Restaure ta progression depuis le Cloud. <strong style="color:var(--coral-l);">Attention :</strong> cela écrasera ta sauvegarde locale.</div>
     <button class="sl-btn sl-btn-cloud-load" onclick="loadFromCloud()">☁️ Charger depuis le Cloud</button>
     <div class="sl-cloud-status" id="cloudLoadStatus"></div>
-  </div>
-</div>
-
-<!-- MEMORY MODAL -->
-<div class="mem-modal-backdrop" id="memModalBackdrop" onclick="closeMemoryModal(event)" style="display:none">
-  <div class="mem-modal" id="memModal">
-    <div class="mem-modal-header">
-      <div class="mem-modal-title" id="memModalTitle">Nouveau souvenir</div>
-      <button class="mem-modal-close" onclick="closeMemoryModal()">✕</button>
-    </div>
-    <div class="mem-modal-body">
-      <input type="hidden" id="memId">
-      <input type="hidden" id="memType" value="free">
-      <input type="hidden" id="memQuestId" value="">
-
-      <div class="mem-field">
-        <label class="mem-label">Titre *</label>
-        <input type="text" class="mem-input" id="memTitle" placeholder="Premier meetup, Mariage de Sarah..." maxlength="100">
-      </div>
-
-      <div class="mem-field-row">
-        <div class="mem-field">
-          <label class="mem-label">Date</label>
-          <input type="date" class="mem-input" id="memDate">
-        </div>
-        <div class="mem-field">
-          <label class="mem-label">Lieu</label>
-          <input type="text" class="mem-input" id="memLieu" placeholder="Paris, Tokyo..." maxlength="80">
-        </div>
-      </div>
-
-      <div class="mem-field">
-        <label class="mem-label">Humeur</label>
-        <div class="mem-moods" id="memMoods">
-          <button type="button" class="mem-mood" data-mood="🔥">🔥</button>
-          <button type="button" class="mem-mood" data-mood="😊">😊</button>
-          <button type="button" class="mem-mood" data-mood="🥹">🥹</button>
-          <button type="button" class="mem-mood" data-mood="😤">😤</button>
-          <button type="button" class="mem-mood" data-mood="😰">😰</button>
-          <button type="button" class="mem-mood" data-mood="🤩">🤩</button>
-          <button type="button" class="mem-mood" data-mood="🌊">🌊</button>
-          <button type="button" class="mem-mood" data-mood="✨">✨</button>
-        </div>
-      </div>
-
-      <div class="mem-field">
-        <label class="mem-label">Anecdote</label>
-        <textarea class="mem-input mem-textarea" id="memAnecdote" placeholder="Ce qui s'est passé, ce que tu as ressenti, ce que tu gardes..."></textarea>
-      </div>
-
-      <div class="mem-field">
-        <label class="mem-label">Photos <span style="color:var(--text-dim);font-weight:400;">(max 5 · redimensionnées auto · stockées sur Supabase)</span></label>
-        <div class="mem-photos-upload">
-          <input type="file" id="memPhotosInput" accept="image/*" multiple style="display:none" onchange="handlePhotoSelect(event)">
-          <button type="button" class="mem-photo-add-btn" onclick="document.getElementById('memPhotosInput').click()" id="memPhotoAddBtn">
-            📷 Ajouter des photos
-          </button>
-        </div>
-        <div class="mem-photos-preview" id="memPhotosPreview"></div>
-        <div class="mem-photo-status" id="memPhotoStatus"></div>
-      </div>
-    </div>
-    <div class="mem-modal-footer">
-      <button class="mem-btn-cancel" onclick="closeMemoryModal()">Annuler</button>
-      <button class="mem-btn-save" id="memSaveBtn" onclick="saveMemory()">💾 Enregistrer</button>
-    </div>
   </div>
 </div>
 
@@ -2209,6 +2177,7 @@ function openMemoryModal(memIdOrNull, prefill = {}) {
   });
 
   backdrop.style.display = 'flex';
+  document.body.style.overflow = 'hidden'; // prevent background scroll on mobile
   setTimeout(() => document.getElementById('memTitle').focus(), 100);
 }
 
@@ -2216,6 +2185,7 @@ function closeMemoryModal(event) {
   if (event && event.target !== document.getElementById('memModalBackdrop')) return;
   _memPendingPhotos = [];
   document.getElementById('memModalBackdrop').style.display = 'none';
+  document.body.style.overflow = ''; // restore scroll
 }
 
 // ─────────────────────────────────────────
@@ -2339,6 +2309,7 @@ async function saveMemory() {
     save();
     _refreshMemBadge();
     document.getElementById('memModalBackdrop').style.display = 'none';
+    document.body.style.overflow = ''; // restore scroll
     if (document.getElementById('s-memories')?.classList.contains('active')) renderMemories();
     addLog(`Souvenir ${isEdit?'modifié':'ajouté'} : <span class="hi">${title}</span>`);
 
@@ -3051,5 +3022,71 @@ if (_swEnabled) {
   });
 } // end if (_swEnabled)
 </script>
+<!-- MEMORY MODAL -->
+<div class="mem-modal-backdrop" id="memModalBackdrop" onclick="closeMemoryModal(event)" style="display:none">
+  <div class="mem-modal" id="memModal">
+    <div class="mem-modal-header">
+      <div class="mem-modal-title" id="memModalTitle">Nouveau souvenir</div>
+      <button class="mem-modal-close" onclick="closeMemoryModal()">✕</button>
+    </div>
+    <div class="mem-modal-body">
+      <input type="hidden" id="memId">
+      <input type="hidden" id="memType" value="free">
+      <input type="hidden" id="memQuestId" value="">
+
+      <div class="mem-field">
+        <label class="mem-label">Titre *</label>
+        <input type="text" class="mem-input" id="memTitle" placeholder="Premier meetup, Mariage de Sarah..." maxlength="100">
+      </div>
+
+      <div class="mem-field-row">
+        <div class="mem-field">
+          <label class="mem-label">Date</label>
+          <input type="date" class="mem-input" id="memDate">
+        </div>
+        <div class="mem-field">
+          <label class="mem-label">Lieu</label>
+          <input type="text" class="mem-input" id="memLieu" placeholder="Paris, Tokyo..." maxlength="80">
+        </div>
+      </div>
+
+      <div class="mem-field">
+        <label class="mem-label">Humeur</label>
+        <div class="mem-moods" id="memMoods">
+          <button type="button" class="mem-mood" data-mood="🔥">🔥</button>
+          <button type="button" class="mem-mood" data-mood="😊">😊</button>
+          <button type="button" class="mem-mood" data-mood="🥹">🥹</button>
+          <button type="button" class="mem-mood" data-mood="😤">😤</button>
+          <button type="button" class="mem-mood" data-mood="😰">😰</button>
+          <button type="button" class="mem-mood" data-mood="🤩">🤩</button>
+          <button type="button" class="mem-mood" data-mood="🌊">🌊</button>
+          <button type="button" class="mem-mood" data-mood="✨">✨</button>
+        </div>
+      </div>
+
+      <div class="mem-field">
+        <label class="mem-label">Anecdote</label>
+        <textarea class="mem-input mem-textarea" id="memAnecdote" placeholder="Ce qui s'est passé, ce que tu as ressenti, ce que tu gardes..."></textarea>
+      </div>
+
+      <div class="mem-field">
+        <label class="mem-label">Photos <span style="color:var(--text-dim);font-weight:400;">(max 5 · redimensionnées auto · stockées sur Supabase)</span></label>
+        <div class="mem-photos-upload">
+          <input type="file" id="memPhotosInput" accept="image/*" multiple style="display:none" onchange="handlePhotoSelect(event)">
+          <button type="button" class="mem-photo-add-btn" onclick="document.getElementById('memPhotosInput').click()" id="memPhotoAddBtn">
+            📷 Ajouter des photos
+          </button>
+        </div>
+        <div class="mem-photos-preview" id="memPhotosPreview"></div>
+        <div class="mem-photo-status" id="memPhotoStatus"></div>
+      </div>
+    </div>
+    <div class="mem-modal-footer">
+      <button class="mem-btn-cancel" onclick="closeMemoryModal()">Annuler</button>
+      <button class="mem-btn-save" id="memSaveBtn" onclick="saveMemory()">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
