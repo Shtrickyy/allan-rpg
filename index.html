@@ -15,7 +15,7 @@
 <link rel="apple-touch-icon" href="/allan-rpg/icon-512.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/allan-rpg/icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="/allan-rpg/icon-512.png">
-<meta name="description" content="Le RPG de ta vraie vie. Quêtes, guildes, légendes et mission du destin.">
+<meta name="description" content="Le carnet de ta vraie vie. Souvenirs, quêtes, chemins de vie et mission du destin.">
 <meta name="application-name" content="Allan RPG">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Space+Mono:wght@400;700&family=Lora:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
@@ -595,6 +595,44 @@ body{
 .mem-fab-primary:active{ transform:translateY(0); }
 .mem-dash-shortcut{ display:flex; align-items:center; gap:16px; padding:18px 22px; background:var(--card); border:1px solid var(--border); border-radius:var(--r); cursor:pointer; transition:all .2s; margin-top:28px; box-shadow:var(--shadow-sm); }
 .mem-dash-shortcut:hover{ border-color:rgba(104,96,168,.26); background:var(--lav-pale); transform:translateY(-2px); box-shadow:var(--shadow-md); }
+
+/* ══ HOME — RÉCIT DE VIE (UX-003) ═══════════════════════════════ */
+/* Bloc principal : dernière aventure vécue */
+.last-adv-card{
+  display:flex; gap:22px; align-items:stretch;
+  background:var(--card); border:1px solid var(--border);
+  border-radius:var(--r); overflow:hidden; margin-bottom:30px;
+  box-shadow:var(--shadow-sm); cursor:pointer; transition:all .22s;
+}
+.last-adv-card:hover{ border-color:var(--border2); transform:translateY(-3px); box-shadow:var(--shadow-md); }
+.last-adv-photo{ flex-shrink:0; width:220px; min-height:200px; overflow:hidden; }
+.last-adv-photo img{ width:100%; height:100%; object-fit:cover; display:block; }
+.last-adv-noPhoto{ flex-shrink:0; width:220px; min-height:200px; display:flex; align-items:center; justify-content:center; font-size:46px; background:var(--lav-pale); color:var(--lav); }
+.last-adv-body{ flex:1; min-width:0; padding:26px 28px 24px 0; display:flex; flex-direction:column; justify-content:center; }
+.last-adv-eyebrow{ font-family:var(--font-mono); font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--ink-dim); margin-bottom:10px; }
+.last-adv-title{ font-family:var(--font-title); font-weight:800; font-size:clamp(20px,2.6vw,28px); letter-spacing:-.5px; line-height:1.15; color:var(--ink); margin-bottom:8px; }
+.last-adv-date{ font-family:var(--font-mono); font-size:10px; letter-spacing:1.5px; color:var(--ink-dim); text-transform:uppercase; margin-bottom:10px; }
+.last-adv-excerpt{ font-size:14px; color:var(--ink-mid); line-height:1.7; font-style:italic; max-width:560px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; margin-bottom:16px; }
+.last-adv-cta{ display:inline-flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:11px; letter-spacing:1px; color:var(--terra); font-weight:700; }
+.last-adv-card:hover .last-adv-cta{ gap:12px; }
+@media(max-width:640px){ .last-adv-card{ flex-direction:column; } .last-adv-photo,.last-adv-noPhoto{ width:100%; min-height:160px; } .last-adv-body{ padding:20px 22px 22px; } }
+
+/* Bloc secondaire : cette semaine dans ton histoire */
+.story-week-row{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin-bottom:30px; }
+.story-tile{ background:var(--card); border:1px solid var(--border); border-radius:var(--r); padding:18px 20px; box-shadow:var(--shadow-sm); }
+.story-tile-val{ font-family:var(--font-title); font-weight:800; font-size:26px; color:var(--ink); line-height:1; margin-bottom:6px; }
+.story-tile-lbl{ font-size:12px; color:var(--ink-dim); line-height:1.4; }
+
+/* Bloc suivant : chronique du mois en cours */
+.chronicle-card{
+  display:flex; align-items:center; gap:18px;
+  background:var(--lav-pale); border:1px solid rgba(104,96,168,.16);
+  border-radius:var(--r); padding:20px 24px; margin-bottom:30px;
+  box-shadow:var(--shadow-sm);
+}
+.chronicle-ico{ font-size:30px; flex-shrink:0; }
+.chronicle-title{ font-family:var(--font-mono); font-size:8px; letter-spacing:2.5px; color:var(--lav); text-transform:uppercase; margin-bottom:5px; }
+.chronicle-text{ font-size:14px; color:var(--ink); line-height:1.6; }
 .memories-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:18px; }
 /* La card souvenir — comme une photo dans un album */
 .mem-card{ background:var(--card); border:1px solid var(--border); border-radius:var(--r); overflow:hidden; transition:all .22s; box-shadow:var(--shadow-sm); }
@@ -758,7 +796,7 @@ body{
   <div class="pcard">
     <div class="pavatar">🧭</div>
     <div class="pname">Allan Dufas</div>
-    <div class="ptitle">Le Monde Ouvert · Saison 31</div>
+    <div class="ptitle">Le Monde Ouvert · Chapitre 31</div>
     <div class="plevel">⚡ Niveau <span id="lvlNum">1</span></div>
     <div class="xp-row">
       <div class="xp-nums"><span><span id="xpE">0</span> XP</span><span>/ <span id="xpT">0</span></span></div>
@@ -782,27 +820,33 @@ body{
   </div>
 
   <div class="ng">
-    <div class="ng-lbl">Monde</div>
-    <button class="ni active" onclick="go('dashboard')"><span class="ni-ico">🗺️</span>Tableau de bord<span class="ni-chev">▾</span></button>
+    <div class="ng-lbl">Ton histoire</div>
+    <button class="ni active" onclick="go('dashboard')"><span class="ni-ico">🏠</span>Accueil<span class="ni-chev">▾</span></button>
     <div class="mob-drawer" id="mob-dashboard"></div>
-    <button class="ni" onclick="go('mq')"><span class="ni-ico">🌍</span>Quête Principale<span class="nbadge" id="nb-mq">0/0</span><span class="ni-chev">▾</span></button>
-    <div class="mob-drawer" id="mob-mq"></div>
+    <button class="ni" onclick="go('journal')"><span class="ni-ico">📖</span>Journal de vie<span class="ni-chev">▾</span></button>
+    <div class="mob-drawer" id="mob-journal"></div>
+    <button class="ni" onclick="go('memories')"><span class="ni-ico">📸</span>Souvenirs<span class="nbadge" id="nb-memories">0</span><span class="ni-chev">▾</span></button>
+    <div class="mob-drawer" id="mob-memories"></div>
+    <button class="ni" onclick="go('legends')"><span class="ni-ico">📚</span>Chroniques<span class="ni-chev">▾</span></button>
+    <div class="mob-drawer" id="mob-legends"></div>
   </div>
   <div class="ng">
-    <div class="ng-lbl">Aventures</div>
-    <button class="ni" onclick="go('humans')"><span class="ni-ico">🍻</span>Guilde des Humains<span class="nbadge" id="nb-humans">0/0</span><span class="ni-chev">▾</span></button>
+    <div class="ng-lbl">🗺️ Chemins de vie</div>
+    <button class="ni" onclick="go('mq')"><span class="ni-ico">🌍</span>Quête Principale<span class="nbadge" id="nb-mq">0/0</span><span class="ni-chev">▾</span></button>
+    <div class="mob-drawer" id="mob-mq"></div>
+    <button class="ni" onclick="go('humans')"><span class="ni-ico">🍻</span>Relations<span class="nbadge" id="nb-humans">0/0</span><span class="ni-chev">▾</span></button>
     <div class="mob-drawer" id="mob-humans"></div>
-    <button class="ni" onclick="go('improv')"><span class="ni-ico">🎭</span>Guilde Improvisation<span class="nbadge" id="nb-improv">0/0</span><span class="ni-chev">▾</span></button>
+    <button class="ni" onclick="go('improv')"><span class="ni-ico">🎭</span>Improvisation<span class="nbadge" id="nb-improv">0/0</span><span class="ni-chev">▾</span></button>
     <div class="mob-drawer" id="mob-improv"></div>
-    <button class="ni" onclick="go('creators')"><span class="ni-ico">🎨</span>Guilde des Créateurs<span class="nbadge" id="nb-creators">0/0</span><span class="ni-chev">▾</span></button>
+    <button class="ni" onclick="go('creators')"><span class="ni-ico">🎨</span>Création<span class="nbadge" id="nb-creators">0/0</span><span class="ni-chev">▾</span></button>
     <div class="mob-drawer" id="mob-creators"></div>
-    <button class="ni" onclick="go('explorer')"><span class="ni-ico">🌴</span>Guilde Explorateur<span class="nbadge" id="nb-explorer">0/0</span><span class="ni-chev">▾</span></button>
+    <button class="ni" onclick="go('explorer')"><span class="ni-ico">🌴</span>Exploration<span class="nbadge" id="nb-explorer">0/0</span><span class="ni-chev">▾</span></button>
     <div class="mob-drawer" id="mob-explorer"></div>
-    <button class="ni" onclick="go('warrior')"><span class="ni-ico">🏋️</span>Sport & Défi<span class="nbadge" id="nb-warrior">0/0</span><span class="ni-chev">▾</span></button>
+    <button class="ni" onclick="go('warrior')"><span class="ni-ico">🏋️</span>Corps<span class="nbadge" id="nb-warrior">0/0</span><span class="ni-chev">▾</span></button>
     <div class="mob-drawer" id="mob-warrior"></div>
-    <button class="ni" onclick="go('charisma')"><span class="ni-ico">🎭</span>Charisme & Scène<span class="nbadge" id="nb-charisma">0/0</span><span class="ni-chev">▾</span></button>
+    <button class="ni" onclick="go('charisma')"><span class="ni-ico">🎭</span>Expression<span class="nbadge" id="nb-charisma">0/0</span><span class="ni-chev">▾</span></button>
     <div class="mob-drawer" id="mob-charisma"></div>
-    <button class="ni" onclick="go('sage')"><span class="ni-ico">📚</span>Le Sage<span class="nbadge" id="nb-sage">0/0</span><span class="ni-chev">▾</span></button>
+    <button class="ni" onclick="go('sage')"><span class="ni-ico">📚</span>Sagesse<span class="nbadge" id="nb-sage">0/0</span><span class="ni-chev">▾</span></button>
     <div class="mob-drawer" id="mob-sage"></div>
   </div>
   <div class="ng">
@@ -815,14 +859,8 @@ body{
     <div class="mob-drawer" id="mob-collectibles"></div>
     <button class="ni" onclick="go('wishlist')"><span class="ni-ico">⭐</span>Mes Favoris<span class="nbadge" id="nb-wish">0</span><span class="ni-chev">▾</span></button>
     <div class="mob-drawer" id="mob-wishlist"></div>
-    <button class="ni" onclick="go('memories')"><span class="ni-ico">📸</span>Souvenirs<span class="nbadge" id="nb-memories">0</span><span class="ni-chev">▾</span></button>
-    <div class="mob-drawer" id="mob-memories"></div>
-    <button class="ni" onclick="go('journal')"><span class="ni-ico">🧭</span>Journal de vie<span class="ni-chev">▾</span></button>
-    <div class="mob-drawer" id="mob-journal"></div>
     <button class="ni" onclick="go('bosses')"><span class="ni-ico">🧠</span>Défis intérieurs<span class="ni-chev">▾</span></button>
     <div class="mob-drawer" id="mob-bosses"></div>
-    <button class="ni" onclick="go('legends')"><span class="ni-ico">📖</span>Journal des Légendes<span class="ni-chev">▾</span></button>
-    <div class="mob-drawer" id="mob-legends"></div>
     <button class="ni" onclick="go('log')"><span class="ni-ico">📜</span>Journal<span class="ni-chev">▾</span></button>
     <div class="mob-drawer" id="mob-log"></div>
   </div>
@@ -836,17 +874,28 @@ body{
 <!-- ═══════ MAIN ═══════ -->
 <main class="main">
 
-<!-- DASHBOARD -->
+<!-- DASHBOARD / ACCUEIL — Récit de vie (UX-003) -->
 <div class="panel active" id="s-dashboard">
   <div class="hero">
-    <div class="stag" style="background:rgba(255,159,28,.1);color:var(--sun);">🗺️ Mon aventure</div>
-    <div class="stitle">Le Monde est plus grand<br>que Cachan.</div>
-    <div class="sdesc">Du temps. De la liberté. L'envie d'aller plus loin. Le monde s'ouvre.</div>
+    <div class="stag" style="background:rgba(104,96,168,.1);color:var(--lav);">🧭 Ton histoire</div>
+    <div class="stitle">Bienvenue dans<br>ton carnet de vie.</div>
+    <div class="sdesc">Je vis. Je capture. Je me souviens. Je construis mon histoire.</div>
   </div>
 
-  <!-- Contrat hebdo -->
+  <!-- Bloc principal — Dernière aventure -->
+  <div id="lastAdvBlock"></div>
+
+  <!-- Bloc secondaire — Cette semaine dans ton histoire -->
+  <div class="ssub">Cette semaine dans ton histoire</div>
+  <div class="story-week-row" id="storyWeekRow"></div>
+
+  <!-- Bloc suivant — Chronique en cours -->
+  <div class="chronicle-card" id="chronicleCard"></div>
+
+  <!-- Bloc suivant — Contrats de la semaine -->
+  <div class="ssub">Contrats de la semaine</div>
   <div class="contrat-card">
-    <div class="contrat-title">📅 Engagements de la semaine</div>
+    <div class="contrat-title">📜 Contrats actifs & quêtes importantes</div>
     <div class="contrat-slots" id="contratSlots"></div>
     <div class="contrat-bonus" id="contratBonus"></div>
   </div>
@@ -862,10 +911,6 @@ body{
     <button class="destin-btn" id="destinDoneBtn" onclick="completeDestin()" style="display:none">✓ Accomplie</button>
   </div>
 
-  <div class="stats-grid" id="dashStats"></div>
-  <div class="ssub">Progression par guilde</div>
-  <div id="guildProgress" style="display:flex;flex-direction:column;gap:10px;"></div>
-
   <!-- Quick memory shortcut -->
   <div class="mem-dash-shortcut" onclick="openMemoryModal(null)">
     <span style="font-size:22px;">📸</span>
@@ -875,6 +920,11 @@ body{
     </div>
     <span style="font-size:18px;color:var(--text-dim);">›</span>
   </div>
+
+  <!-- Progression (secondaire — la quête comme moteur, pas comme finalité) -->
+  <div class="ssub">Ta progression</div>
+  <div class="stats-grid" id="dashStats"></div>
+  <div id="guildProgress" style="display:flex;flex-direction:column;gap:10px;"></div>
 </div>
 
 <!-- MAIN QUEST -->
@@ -890,8 +940,8 @@ body{
 <!-- HUMANS -->
 <div class="panel" id="s-humans">
   <div class="hero">
-    <div class="stag" style="background:rgba(255,159,28,.1);color:var(--sun);">🍻 Guilde</div>
-    <div class="stitle">Guilde des Humains</div>
+    <div class="stag" style="background:rgba(255,159,28,.1);color:var(--sun);">🍻 Domaine de vie</div>
+    <div class="stitle">Relations</div>
     <div class="sdesc">"Ce qui me fait me sentir vivant, c'est les gens." — Ton arbre principal.</div>
   </div>
   <div class="accordion" id="acc-humans"></div>
@@ -900,8 +950,8 @@ body{
 <!-- IMPROV -->
 <div class="panel" id="s-improv">
   <div class="hero">
-    <div class="stag" style="background:rgba(239,71,111,.1);color:var(--coral-l);">🎭 Guilde</div>
-    <div class="stitle">Guilde de l'Improvisation</div>
+    <div class="stag" style="background:rgba(239,71,111,.1);color:var(--coral-l);">🎭 Domaine de vie</div>
+    <div class="stitle">Improvisation</div>
     <div class="sdesc">Probablement l'une des plus importantes. Dire oui avant de savoir comment.</div>
   </div>
   <div class="accordion" id="acc-improv"></div>
@@ -910,8 +960,8 @@ body{
 <!-- CREATORS (merged with artists) -->
 <div class="panel" id="s-creators">
   <div class="hero">
-    <div class="stag" style="background:rgba(155,93,229,.1);color:var(--lav-l);">🎨 Guilde</div>
-    <div class="stitle">Guilde des Créateurs</div>
+    <div class="stag" style="background:rgba(155,93,229,.1);color:var(--lav-l);">🎨 Domaine de vie</div>
+    <div class="stitle">Création</div>
     <div class="sdesc">Barde · Écrivain · Photographe · Documentariste · Conteur. L'art comme moyen d'être pleinement vivant.</div>
   </div>
   <div class="filter-bar" id="creatorsFilter"></div>
@@ -922,8 +972,8 @@ body{
 <!-- EXPLORER -->
 <div class="panel" id="s-explorer">
   <div class="hero">
-    <div class="stag" style="background:rgba(6,214,160,.1);color:var(--ocean);">🌴 Guilde</div>
-    <div class="stitle">Guilde de l'Explorateur</div>
+    <div class="stag" style="background:rgba(6,214,160,.1);color:var(--ocean);">🌴 Domaine de vie</div>
+    <div class="stitle">Exploration</div>
     <div class="sdesc">Biomes. Week-ends aléatoires. Dormir ailleurs. Le monde comme terrain de jeu.</div>
   </div>
   <div class="ssub">🗺️ Biomes débloqués</div>
@@ -934,8 +984,8 @@ body{
 <!-- WARRIOR -->
 <div class="panel" id="s-warrior">
   <div class="hero">
-    <div class="stag" style="background:rgba(239,71,111,.1);color:var(--coral-l);">🏋️ Chapitre</div>
-    <div class="stitle">Sport & Défi physique</div>
+    <div class="stag" style="background:rgba(239,71,111,.1);color:var(--coral-l);">🏋️ Domaine de vie</div>
+    <div class="stitle">Corps</div>
     <div class="sdesc">Haltérophilie. Sports d'aventure. Skills acrobatiques. La forge du corps.</div>
   </div>
   <div class="accordion" id="acc-warrior"></div>
@@ -944,9 +994,9 @@ body{
 <!-- CHARISMA -->
 <div class="panel" id="s-charisma">
   <div class="hero">
-    <div class="stag" style="background:rgba(239,71,111,.1);color:var(--coral-l);">🎭 Chapitre</div>
-    <div class="stitle">Charisme & Scène</div>
-    <div class="sdesc">Salsa. Théâtre. Stand-up. Boss : la peur du ridicule et le regard des autres.</div>
+    <div class="stag" style="background:rgba(239,71,111,.1);color:var(--coral-l);">🎭 Domaine de vie</div>
+    <div class="stitle">Expression</div>
+    <div class="sdesc">Salsa. Théâtre. Stand-up. Le vrai défi : la peur du ridicule et le regard des autres.</div>
   </div>
   <div class="accordion" id="acc-charisma"></div>
 </div>
@@ -954,8 +1004,8 @@ body{
 <!-- SAGE -->
 <div class="panel" id="s-sage">
   <div class="hero">
-    <div class="stag" style="background:rgba(155,93,229,.1);color:var(--lav-l);">📚 Quêtes</div>
-    <div class="stitle">Le Sage</div>
+    <div class="stag" style="background:rgba(155,93,229,.1);color:var(--lav-l);">📚 Domaine de vie</div>
+    <div class="stitle">Sagesse</div>
     <div class="sdesc">Langues, disciplines nouvelles, livres. L'esprit aussi mérite son programme.</div>
   </div>
   <div class="accordion" id="acc-sage"></div>
@@ -1001,7 +1051,7 @@ body{
   </div>
   <div class="gm-row">
     <div class="toggle" id="gmToggle" onclick="toggleGM()"><div class="toggle-k"></div></div>
-    <div class="toggle-lbl"><strong>Mode Game Master</strong> — Active le contrat hebdomadaire sur le dashboard (optionnel)</div>
+    <div class="toggle-lbl"><strong>Mode Accompagnement</strong> — Active les contrats de la semaine sur l'accueil (optionnel)</div>
   </div>
   <div class="bs-grid" id="bsGrid"></div>
 </div>
@@ -1084,7 +1134,7 @@ body{
   <div class="hero">
     <div class="stag" style="background:rgba(244,196,48,.1);color:var(--gold);">⭐ Favoris</div>
     <div class="stitle">Mes Favoris</div>
-    <div class="sdesc">Les quêtes que tu as envie de faire bientôt. Clique sur ⭐ dans n'importe quelle guilde pour en ajouter.</div>
+    <div class="sdesc">Les quêtes que tu as envie de faire bientôt. Clique sur ⭐ dans n'importe quel chemin de vie pour en ajouter.</div>
   </div>
   <div id="wishlistContent"></div>
 </div>
@@ -1172,7 +1222,7 @@ mq:{label:'Quête Principale',navId:'nb-mq',groups:[
   ]},
 ]},
 
-humans:{label:'Guilde des Humains',navId:'nb-humans',groups:[
+humans:{label:'Relations',navId:'nb-humans',groups:[
   {id:'gh1',icon:'☕',color:'#FF9F1C',name:'Niveau 1 · Échauffement social',reward:'🏆 "PNJ ? Quel PNJ ?"',
    quests:[
     {id:'h1',name:'Boire un café avec un inconnu',xp:150,d:'easy'},
@@ -1214,7 +1264,7 @@ humans:{label:'Guilde des Humains',navId:'nb-humans',groups:[
   ]},
 ]},
 
-improv:{label:'Guilde Improvisation',navId:'nb-improv',groups:[
+improv:{label:'Improvisation',navId:'nb-improv',groups:[
   {id:'gi1',icon:'🎭',color:'#EF476F',name:'Dire oui avant de savoir comment',
    sub:'Chaque item = une expérience non planifiée',
    quests:[
@@ -1231,7 +1281,7 @@ improv:{label:'Guilde Improvisation',navId:'nb-improv',groups:[
   ]},
 ]},
 
-creators:{label:'Guilde des Créateurs',navId:'nb-creators',groups:[
+creators:{label:'Création',navId:'nb-creators',groups:[
   {id:'gc1',icon:'🎸',color:'#FF9F1C',name:'Branche Barde',
    quests:[
     {id:'cr1',name:'Acheter une guitare',xp:100,d:'easy'},
@@ -1273,7 +1323,7 @@ creators:{label:'Guilde des Créateurs',navId:'nb-creators',groups:[
   ]},
 ]},
 
-explorer:{label:'Guilde Explorateur',navId:'nb-explorer',groups:[
+explorer:{label:'Exploration',navId:'nb-explorer',groups:[
   {id:'ge1',icon:'🗼',color:'#118AB2',name:'Parisien Touriste',
    sub:'10 trucs jamais faits à Paris',
    quests:[
@@ -1303,7 +1353,7 @@ explorer:{label:'Guilde Explorateur',navId:'nb-explorer',groups:[
   ]},
 ]},
 
-warrior:{label:'Guilde Guerrier',navId:'nb-warrior',groups:[
+warrior:{label:'Corps',navId:'nb-warrior',groups:[
   {id:'gw1',icon:'🏋️',color:'#EF476F',name:'Haltérophile · Paliers',
    sub:'Actuels : Snatch 80 · C&J 97.5 · Total 177.5',
    quests:[
@@ -1365,7 +1415,7 @@ warrior:{label:'Guilde Guerrier',navId:'nb-warrior',groups:[
   ]},
 ]},
 
-charisma:{label:'DLC Charisme',navId:'nb-charisma',groups:[
+charisma:{label:'Expression',navId:'nb-charisma',groups:[
   {id:'gch1',icon:'💃',color:'#EF476F',name:'Branche Salsa',
    boss:{name:'La peur du ridicule',icon:'😰'},
    quests:[
@@ -1383,7 +1433,7 @@ charisma:{label:'DLC Charisme',navId:'nb-charisma',groups:[
   ]},
 ]},
 
-sage:{label:'Le Sage',navId:'nb-sage',groups:[
+sage:{label:'Sagesse',navId:'nb-sage',groups:[
   {id:'gsg1',icon:'📖',color:'#9B5DE5',name:'Lecture',reward:'🏆 Polymathe',
    quests:[
     {id:'sg1',name:'Lire 12 livres en 12 mois',xp:400,d:'hard'},
@@ -1829,7 +1879,7 @@ function refreshContrat(){
         <span class="cs-ico">${cat.ico}</span>
         <span style="flex:1">
           <strong style="font-size:12px;font-family:'Space Mono',monospace;letter-spacing:.5px">${cat.lbl}</strong>
-          <span class="cs-label" style="color:var(--text-dim)">Choisir une quête…</span>
+          <span class="cs-label" style="color:var(--text-dim)">Choisir quelque chose à vivre…</span>
         </span>
         <span style="font-size:18px;color:var(--text-dim);opacity:.5">＋</span>`;
     }
@@ -1847,7 +1897,7 @@ function refreshContrat(){
     ?'🎉 Contrat accompli ! Bonus +500 XP débloqué cette semaine.'
     :total>0
       ?`${allDone}/${CONTRAT_CATS.length} quêtes accomplies cette semaine.`
-      :'Clique sur une catégorie pour choisir ta quête de la semaine.';
+      :'Clique sur une catégorie pour choisir ton expérience de la semaine.';
 }
 
 function _removeContrat(e, catKey){
@@ -1891,9 +1941,9 @@ function openCpicker(catKey, catLbl, catIco, wk){
   document.getElementById('cpickerSearch').value='';
   document.getElementById('cpickerConfirm').disabled=!_cpState.selectedId;
   document.getElementById('cpickerHint').textContent=
-    _cpState.selectedId?'1 quête sélectionnée':'Sélectionne une quête';
+    _cpState.selectedId?'Une expérience choisie':'Choisis ce que tu as envie de vivre';
 
-  _cpOpenGuild=null; // start with all guilds collapsed
+  _cpOpenGuild=null; // start with all life paths collapsed
   _cpickerRenderList('');
   document.getElementById('cpickerBackdrop').style.display='flex';
   document.body.style.overflow='hidden';
@@ -1913,7 +1963,7 @@ function _cpickerBackdropClick(e){
 
 function _cpickerFilter(){
   const q=document.getElementById('cpickerSearch').value;
-  if(!q.trim()) _cpOpenGuild=null; // back to accordion when search cleared
+  if(!q.trim()) _cpOpenGuild=null; // back to accordion when search cleared (var name kept — technical id only)
   _cpickerRenderList(q);
 }
 
@@ -1931,7 +1981,7 @@ function _cpickerSetSelected(qid, currentFilter){
   const confirmBtn=document.getElementById('cpickerConfirm');
   confirmBtn.disabled=!_cpState.selectedId;
   document.getElementById('cpickerHint').textContent=
-    _cpState.selectedId?'1 quête sélectionnée — confirme ton choix':'Sélectionne une quête';
+    _cpState.selectedId?'Expérience choisie — confirme ton choix':'Choisis ce que tu as envie de vivre';
   _cpickerRenderList(currentFilter);
 }
 
@@ -2129,9 +2179,96 @@ function completeDestin(){
 }
 
 /* ═══════════════════════════════════════════════════
+   HOME — RÉCIT DE VIE (UX-003)
+   Trois blocs : dernière aventure, cette semaine,
+   chronique du mois en cours. Le ton reste humain —
+   pas de dashboard, pas d'effet KPI.
+═══════════════════════════════════════════════════ */
+function _homeWeekKey(dateStr){
+  if(!dateStr) return null;
+  const d=new Date(dateStr+'T00:00:00');
+  if(isNaN(d)) return null;
+  return d.getFullYear()+'-W'+Math.ceil(((d-new Date(d.getFullYear(),0,1))/864e5+1)/7);
+}
+
+function refreshHomeStory(){
+  const mems=[...(S.memories||[])].sort((a,b)=>(b.date||b.createdAt||'').localeCompare(a.date||a.createdAt||''));
+
+  // ── Bloc principal : Dernière aventure ──────────────────────
+  const advBlock=document.getElementById('lastAdvBlock');
+  if(advBlock){
+    if(mems.length){
+      const m=mems[0];
+      const photo=(m.photos&&m.photos[0])?m.photos[0]:null;
+      const excerpt=m.anecdote?m.anecdote.replace(/</g,'&lt;'):'';
+      // TODO FEAT-015 : ce CTA ("Continuer la lecture") ouvre le souvenir via
+      // openMemoryDetail(), qui redirige aujourd'hui vers la modale d'édition.
+      // Quand FEAT-015 (écran de lecture immersif "détail du souvenir") sera
+      // implémentée, ce CTA devra ouvrir cet écran dédié — aucun changement
+      // de markup nécessaire ici, le hook est centralisé dans openMemoryDetail().
+      advBlock.innerHTML=`
+        <div class="last-adv-card" onclick="openMemoryDetail('${m.id}')">
+          ${photo?`<div class="last-adv-photo"><img src="${photo.url}" alt="" loading="lazy"></div>`:`<div class="last-adv-noPhoto">${m.humeur||'📍'}</div>`}
+          <div class="last-adv-body">
+            <div class="last-adv-eyebrow">📖 Dernière aventure</div>
+            <div class="last-adv-title">${m.title||'Sans titre'}</div>
+            <div class="last-adv-date">${_memFormatDate(m.date)}</div>
+            ${excerpt?`<div class="last-adv-excerpt">${excerpt}</div>`:''}
+            <div class="last-adv-cta">Continuer la lecture →</div>
+          </div>
+        </div>`;
+    }else{
+      advBlock.innerHTML=`
+        <div class="last-adv-card" onclick="openMemoryModal(null)">
+          <div class="last-adv-noPhoto">🧭</div>
+          <div class="last-adv-body">
+            <div class="last-adv-eyebrow">📖 Dernière aventure</div>
+            <div class="last-adv-title">Ton histoire commence ici.</div>
+            <div class="last-adv-excerpt">Capture ton premier souvenir pour commencer à raconter ta vie.</div>
+            <div class="last-adv-cta">Créer un souvenir →</div>
+          </div>
+        </div>`;
+    }
+  }
+
+  // ── Bloc secondaire : Cette semaine dans ton histoire ───────
+  const wk=weekKey();
+  const memsThisWeek=mems.filter(m=>_homeWeekKey(m.date||((m.createdAt||'').slice(0,10)))===wk);
+  const questsThisWeek=Object.values(S.done||{}).filter(ts=>_homeWeekKey(new Date(ts).toISOString().slice(0,10))===wk);
+  const daysThisWeek=new Set(memsThisWeek.map(m=>m.date).filter(Boolean));
+
+  const row=document.getElementById('storyWeekRow');
+  if(row){
+    row.innerHTML=`
+      <div class="story-tile"><div class="story-tile-val">${memsThisWeek.length}</div><div class="story-tile-lbl">souvenir${memsThisWeek.length>1?'s':''} créé${memsThisWeek.length>1?'s':''}</div></div>
+      <div class="story-tile"><div class="story-tile-val">${questsThisWeek.length}</div><div class="story-tile-lbl">quête${questsThisWeek.length>1?'s':''} accomplie${questsThisWeek.length>1?'s':''}</div></div>
+      <div class="story-tile"><div class="story-tile-val">${daysThisWeek.size}</div><div class="story-tile-lbl">jour${daysThisWeek.size>1?'s':''} documenté${daysThisWeek.size>1?'s':''}</div></div>`;
+  }
+
+  // ── Bloc suivant : Chronique en cours (mois actuel) ─────────
+  const now=new Date();
+  const monthName=JOURNAL_MONTH_NAMES[now.getMonth()];
+  const memsThisMonth=mems.filter(m=>{
+    const d=_journalParseDate(m.date||m.createdAt);
+    return d&&d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth();
+  });
+  const daysThisMonth=new Set(memsThisMonth.map(m=>m.date).filter(Boolean));
+  const chronicle=document.getElementById('chronicleCard');
+  if(chronicle){
+    chronicle.innerHTML=`
+      <div class="chronicle-ico">📖</div>
+      <div>
+        <div class="chronicle-title">Chronique en cours — ${monthName}</div>
+        <div class="chronicle-text">${memsThisMonth.length?`Tu écris ce chapitre depuis ${daysThisMonth.size} jour${daysThisMonth.size>1?'s':''}, avec ${memsThisMonth.length} souvenir${memsThisMonth.length>1?'s':''} déjà posé${memsThisMonth.length>1?'s':''} sur le papier.`:`Ce chapitre commence tout juste. Chaque souvenir que tu ajoutes vient l'écrire.`}</div>
+      </div>`;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
    DASHBOARD
 ═══════════════════════════════════════════════════ */
 function refreshDashboard(){
+  refreshHomeStory();
   // Stats tiles
   const sg=document.getElementById('dashStats');
   if(sg){
@@ -2648,6 +2785,9 @@ function _journalEntryHtml(mem) {
   const questName = _memQuestName(mem.questId);
   const photo = (mem.photos && mem.photos[0]) ? mem.photos[0] : null;
   const excerpt = mem.anecdote ? mem.anecdote.replace(/</g,'&lt;') : '';
+  // TODO FEAT-015 : clic sur une entrée de la timeline → openMemoryDetail().
+  // À remplacer par l'écran de lecture immersif "détail du souvenir" une fois
+  // FEAT-015 implémentée (hook déjà centralisé dans openMemoryDetail()).
   return `
     <div class="journal-entry" onclick="openMemoryDetail('${mem.id}')">
       <div class="journal-marker">${mem.humeur || '📍'}</div>
@@ -3048,7 +3188,7 @@ function renderWishlist(){
   if(wished.length===0){
     container.innerHTML=`<div class="empty" style="padding:60px 20px;">
       <div style="font-size:48px;margin-bottom:14px;opacity:.4">⭐</div>
-      <div>Aucun favori pour l\'instant.<br>Clique sur l\'étoile ⭐ dans n\'importe quelle guilde.</div>
+      <div>Aucun favori pour l\'instant.<br>Clique sur l\'étoile ⭐ dans n\'importe quel chemin de vie.</div>
     </div>`;
     return;
   }
@@ -3692,16 +3832,16 @@ if (_swEnabled) {
     <div class="cpicker-header">
       <div class="cpicker-title">
         <span id="cpickerCatIco"></span>
-        <span id="cpickerCatLbl">Choisir une quête</span>
+        <span id="cpickerCatLbl">Choisir une expérience</span>
       </div>
       <button class="cpicker-close" onclick="closeCpicker()">✕</button>
     </div>
     <div class="cpicker-search">
-      <input type="text" id="cpickerSearch" placeholder="Rechercher une quête..." oninput="_cpickerFilter()" autocomplete="off">
+      <input type="text" id="cpickerSearch" placeholder="Rechercher une expérience..." oninput="_cpickerFilter()" autocomplete="off">
     </div>
     <div class="cpicker-list" id="cpickerList"></div>
     <div class="cpicker-footer">
-      <span class="cpicker-hint" id="cpickerHint">Sélectionne une quête</span>
+      <span class="cpicker-hint" id="cpickerHint">Choisis ce que tu as envie de vivre</span>
       <button class="cpicker-btn-confirm" id="cpickerConfirm" onclick="_cpickerConfirm()" disabled>Choisir</button>
     </div>
   </div>
