@@ -619,6 +619,28 @@ body{
 .mem-card-btn:hover{ color:var(--ink); background:rgba(140,110,72,.08); }
 .mem-card-btn.del:hover{ color:var(--terra); border-color:rgba(184,82,48,.22); }
 
+/* Journal de vie — timeline en forme de carnet de voyage (FEAT-014) */
+.journal-stats{ font-family:var(--font-mono); font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-dim); margin-top:10px; }
+.journal-timeline{ display:flex; flex-direction:column; gap:34px; }
+.journal-year-block{ display:flex; flex-direction:column; gap:22px; }
+.journal-year-label{ font-family:var(--font-title); font-weight:800; font-size:27px; color:var(--ink); letter-spacing:.5px; padding-bottom:10px; border-bottom:2px solid var(--lav); }
+.journal-group-month{ margin-left:4px; }
+.journal-group-label{ display:flex; align-items:center; gap:8px; font-family:var(--font-mono); font-weight:700; font-size:13px; letter-spacing:2px; text-transform:uppercase; color:var(--lav); margin-bottom:24px; }
+.journal-group-icon{ font-size:15px; }
+.journal-thread{ position:relative; display:flex; flex-direction:column; gap:16px; padding-left:36px; }
+.journal-thread::before{ content:''; position:absolute; left:13px; top:6px; bottom:6px; width:2px; background:linear-gradient(180deg, var(--lav) 0%, rgba(104,96,168,.10) 100%); border-radius:2px; }
+.journal-entry{ position:relative; display:flex; cursor:pointer; }
+.journal-marker{ position:absolute; left:-36px; top:13px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-size:15px; background:var(--card); border:2px solid var(--lav); border-radius:50%; box-shadow:var(--shadow-sm); z-index:1; }
+.journal-card{ flex:1; min-width:0; display:flex; gap:14px; background:var(--card); border:1px solid var(--border); border-radius:var(--rs); padding:14px 16px; transition:all .2s; box-shadow:var(--shadow-sm); }
+.journal-entry:hover .journal-card{ border-color:var(--lav); transform:translateX(3px); box-shadow:var(--shadow-md); }
+.journal-card-photo{ flex-shrink:0; width:64px; height:64px; border-radius:10px; overflow:hidden; }
+.journal-card-photo img{ width:100%; height:100%; object-fit:cover; }
+.journal-card-body{ flex:1; min-width:0; }
+.journal-card-date{ font-family:var(--font-mono); font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-dim); margin-bottom:4px; }
+.journal-card-title{ font-family:var(--font-title); font-weight:700; font-size:15px; color:var(--ink); margin-bottom:4px; line-height:1.25; }
+.journal-card-quest{ display:inline-flex; align-items:center; gap:3px; font-family:var(--font-mono); font-size:8px; padding:2px 9px; border-radius:10px; background:var(--terra-pale); border:1px solid rgba(184,82,48,.16); color:var(--terra-d); margin-bottom:6px; }
+.journal-card-excerpt{ font-size:12.5px; color:var(--ink-mid); line-height:1.6; font-style:italic; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+
 /* Modale souvenir */
 .mem-modal-backdrop{ position:fixed; inset:0; background:rgba(28,18,8,.5); z-index:99999; display:flex; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); animation:fadeIn .2s ease; isolation:isolate; }
 .mem-modal{ background:var(--card); border:1px solid var(--border); border-radius:var(--r); width:100%; max-width:548px; max-height:min(90vh,90dvh); overflow-y:auto; -webkit-overflow-scrolling:touch; display:flex; flex-direction:column; position:relative; z-index:1; box-shadow:var(--shadow-lg); }
@@ -795,6 +817,8 @@ body{
     <div class="mob-drawer" id="mob-wishlist"></div>
     <button class="ni" onclick="go('memories')"><span class="ni-ico">📸</span>Souvenirs<span class="nbadge" id="nb-memories">0</span><span class="ni-chev">▾</span></button>
     <div class="mob-drawer" id="mob-memories"></div>
+    <button class="ni" onclick="go('journal')"><span class="ni-ico">🧭</span>Journal de vie<span class="ni-chev">▾</span></button>
+    <div class="mob-drawer" id="mob-journal"></div>
     <button class="ni" onclick="go('bosses')"><span class="ni-ico">🧠</span>Défis intérieurs<span class="ni-chev">▾</span></button>
     <div class="mob-drawer" id="mob-bosses"></div>
     <button class="ni" onclick="go('legends')"><span class="ni-ico">📖</span>Journal des Légendes<span class="ni-chev">▾</span></button>
@@ -1034,6 +1058,24 @@ body{
     <div style="font-size:16px;font-weight:600;margin-bottom:8px;color:var(--text);">Aucun moment enregistré</div>
     <div style="margin-bottom:20px;">Commence par ajouter un moment important de ta vie,<br>ou valide une quête pour en créer un automatiquement.</div>
     <button class="mem-fab-primary" style="margin:0 auto;" onclick="openMemoryModal(null)">＋ Ajouter un moment de vie</button>
+  </div>
+</div>
+
+<!-- JOURNAL DE VIE — TIMELINE -->
+<div class="panel" id="s-journal">
+  <div class="hero">
+    <div class="stag" style="background:rgba(104,96,168,.1);color:var(--lav);">🧭 Carnet de voyage</div>
+    <div class="stitle">Journal de vie</div>
+    <div class="sdesc">L'histoire de ton aventure, racontée étape après étape. Chaque souvenir est un point sur ton chemin — du plus récent au plus ancien.</div>
+    <div class="journal-stats" id="journalStats"></div>
+  </div>
+
+  <div id="journalTimeline" class="journal-timeline"></div>
+  <div class="empty" id="journalEmpty" style="display:none">
+    <div style="font-size:56px;margin-bottom:16px;">🧭</div>
+    <div style="font-size:16px;font-weight:600;margin-bottom:8px;color:var(--ink);">Ton carnet est encore vide.</div>
+    <div style="margin-bottom:20px;">Chaque aventure commence quelque part.<br>Ajoute ton premier souvenir pour commencer à raconter ton histoire.</div>
+    <button class="mem-fab-primary" style="margin:0 auto;" onclick="openMemoryModal(null)">＋ Créer un souvenir</button>
   </div>
 </div>
 
@@ -2545,6 +2587,123 @@ function setMemFilter(btn, mode) {
 }
 
 // ─────────────────────────────────────────
+// JOURNAL DE VIE — TIMELINE (FEAT-014)
+// ─────────────────────────────────────────
+const JOURNAL_MONTH_NAMES = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+
+// Parse une date de souvenir ('YYYY-MM-DD' ou timestamp ISO) en objet Date local (minuit), ou null si invalide.
+function _journalParseDate(isoDateOrTimestamp) {
+  if (!isoDateOrTimestamp) return null;
+  const raw = String(isoDateOrTimestamp).slice(0, 10);
+  const d = new Date(raw + 'T00:00:00');
+  return isNaN(d.getTime()) ? null : d;
+}
+
+// Construit les sections de la timeline : d'abord les groupes "relatifs" (Aujourd'hui /
+// hiérarchie unique : Année (volume) > Mois (chapitre) > Souvenirs (pages).
+// `mems` doit déjà être trié du plus récent au plus ancien — un simple passage
+// séquentiel suffit alors à former des blocs Année > Mois cohérents.
+function _journalBuildSections(mems) {
+  const sections = [];
+  let curYear = undefined, curYearBlock = null;
+  let curMonth = undefined, curMonthBlock = null;
+
+  mems.forEach(m => {
+    const d = _journalParseDate(m.date || m.createdAt);
+    const year     = d ? d.getFullYear() : null;
+    const monthIdx = d ? d.getMonth()    : null;
+
+    if (year !== curYear) {
+      curYear = year;
+      curYearBlock = { kind:'year', year, months: [] };
+      sections.push(curYearBlock);
+      curMonth = undefined;
+    }
+    if (monthIdx !== curMonth) {
+      curMonth = monthIdx;
+      curMonthBlock = { label: monthIdx != null ? JOURNAL_MONTH_NAMES[monthIdx] : 'Date inconnue', items: [] };
+      curYearBlock.months.push(curMonthBlock);
+    }
+    curMonthBlock.items.push(m);
+  });
+
+  return sections;
+}
+
+function _journalRenderStats(mems) {
+  const el = document.getElementById('journalStats');
+  if (!el) return;
+  if (!mems.length) { el.textContent = ''; return; }
+  const months = new Set();
+  mems.forEach(m => {
+    const d = _journalParseDate(m.date || m.createdAt);
+    if (d) months.add(d.getFullYear() + '-' + d.getMonth());
+  });
+  const count = mems.length;
+  const monthCount = months.size;
+  el.textContent = `${count} souvenir${count > 1 ? 's' : ''} enregistré${count > 1 ? 's' : ''} • ${monthCount} mois documenté${monthCount > 1 ? 's' : ''}`;
+}
+
+function _journalEntryHtml(mem) {
+  const questName = _memQuestName(mem.questId);
+  const photo = (mem.photos && mem.photos[0]) ? mem.photos[0] : null;
+  const excerpt = mem.anecdote ? mem.anecdote.replace(/</g,'&lt;') : '';
+  return `
+    <div class="journal-entry" onclick="openMemoryDetail('${mem.id}')">
+      <div class="journal-marker">${mem.humeur || '📍'}</div>
+      <div class="journal-card">
+        ${photo ? `<div class="journal-card-photo"><img src="${photo.url}" alt="" loading="lazy"></div>` : ''}
+        <div class="journal-card-body">
+          <div class="journal-card-date">${_memFormatDate(mem.date)}</div>
+          <div class="journal-card-title">${mem.title || 'Sans titre'}</div>
+          ${questName ? `<div class="journal-card-quest">🏆 ${questName}</div>` : ''}
+          ${excerpt ? `<div class="journal-card-excerpt">${excerpt}</div>` : ''}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderJournalTimeline() {
+  const wrap  = document.getElementById('journalTimeline');
+  const empty = document.getElementById('journalEmpty');
+  if (!wrap) return;
+
+  // Réutilise S.memories — même tri anté-chronologique que l'écran Souvenirs.
+  const mems = [...(S.memories || [])].sort((a,b) => (b.date||b.createdAt||'').localeCompare(a.date||a.createdAt||''));
+
+  _journalRenderStats(mems);
+
+  if (mems.length === 0) {
+    wrap.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  const sections = _journalBuildSections(mems);
+
+  // Hiérarchie unique : Année (volume) > Mois (chapitre) > Souvenirs (pages)
+  wrap.innerHTML = sections.map(sec => `
+      <div class="journal-year-block">
+        <div class="journal-year-label">${sec.year != null ? sec.year : 'Date inconnue'}</div>
+        ${sec.months.map(mo => `
+          <div class="journal-group journal-group-month">
+            <div class="journal-group-label"><span class="journal-group-icon">📅</span>${mo.label}</div>
+            <div class="journal-thread">${mo.items.map(_journalEntryHtml).join('')}</div>
+          </div>`).join('')}
+      </div>`)
+    .join('');
+}
+
+// Hook FEAT-015 : ouverture du détail d'un souvenir depuis la timeline.
+// Pour l'instant, redirige vers la modale d'édition existante ; FEAT-015
+// remplacera ce comportement par un écran de lecture immersif dédié.
+function openMemoryDetail(memId) {
+  // TODO FEAT-015 : remplacer par l'écran/modal "détail du souvenir".
+  openMemoryModal(memId);
+}
+
+// ─────────────────────────────────────────
 // MODAL — OPEN / CLOSE
 // ─────────────────────────────────────────
 function openMemoryModal(memIdOrNull, prefill = {}) {
@@ -2745,6 +2904,7 @@ async function saveMemory() {
     document.getElementById('memModalBackdrop').style.display = 'none';
     document.body.style.overflow = ''; // restore scroll
     if (document.getElementById('s-memories')?.classList.contains('active')) renderMemories();
+    if (document.getElementById('s-journal')?.classList.contains('active')) renderJournalTimeline();
     addLog(`Souvenir ${isEdit?'modifié':'ajouté'} : <span class="hi">${title}</span>`);
 
     saveBtn.disabled = false;
@@ -2771,6 +2931,7 @@ async function deleteMemory(memId) {
   save();
   _refreshMemBadge();
   renderMemories();
+  if (document.getElementById('s-journal')?.classList.contains('active')) renderJournalTimeline();
   addLog(`Souvenir supprimé : <span class="hi">${mem.title}</span>`);
 }
 
@@ -2987,6 +3148,7 @@ function _runSectionRender(id) {
   if(id==='explorer'){renderBiomes();renderFilterBar('explorer','explorerFilter');}
   if(id==='legends')renderLegends();
   if(id==='memories'){renderMemories();}
+  if(id==='journal'){renderJournalTimeline();}
   if(id==='wishlist'){renderWishlist();refreshWishBadge();}
   if(id==='dashboard'){refreshDashboard();refreshContrat();}
   if(id==='saveload'){buildExportStats();}
