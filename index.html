@@ -699,6 +699,79 @@ body{
 .mem-mood{ font-size:22px; background:var(--bg); border:2px solid transparent; border-radius:11px; padding:7px 11px; cursor:pointer; transition:all .13s; line-height:1; }
 .mem-mood:hover{ background:var(--bg3); }
 .mem-mood.selected{ border-color:var(--lav); background:var(--lav-pale); }
+
+/* ───────── MEMORY DETAIL VIEW (FEAT-015 / FEAT-015.1) — page de carnet ─────────
+   Cible : "j'entre dans un chapitre", pas "j'ouvre une fenêtre".
+   Hiérarchie : photo → contexte (date·lieu·humeur) → titre → récit → galerie → origine. */
+@keyframes memdetIn{ from{ opacity:0; transform:translateY(28px) scale(.985); } to{ opacity:1; transform:translateY(0) scale(1); } }
+.memdet-backdrop{ position:fixed; inset:0; background:rgba(40,28,14,.4); z-index:99998; display:flex; align-items:flex-start; justify-content:center; padding:40px 20px; overflow-y:auto; backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); animation:fadeIn .25s ease; }
+.memdet-page{ position:relative; background:var(--card); border:1px solid var(--border); border-radius:var(--r); width:100%; max-width:680px; margin:0 auto 40px; box-shadow:var(--shadow-lg); overflow:hidden; animation:memdetIn .4s cubic-bezier(.16,1,.3,1); }
+.memdet-close{ position:absolute; top:16px; right:16px; z-index:3; width:38px; height:38px; border-radius:50%; border:none; background:rgba(28,18,8,.36); color:#FAF6ED; font-size:15px; line-height:1; display:flex; align-items:center; justify-content:center; cursor:pointer; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); transition:all .15s; }
+.memdet-close:hover{ background:rgba(28,18,8,.54); transform:scale(1.06); }
+.memdet-hero{ overflow:hidden; min-height:300px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, var(--lav-pale), var(--sand-d)); }
+.memdet-hero img{ display:block; width:100%; height:100%; min-height:300px; object-fit:cover; cursor:zoom-in; }
+.memdet-hero-emoji{ font-size:92px; }
+.memdet-meta-bar{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; margin:26px 28px 0; font-family:var(--font-mono); font-size:12px; letter-spacing:.6px; color:var(--ink-dim); }
+.memdet-meta-bar .memdet-meta-sep{ opacity:.4; }
+.memdet-meta-bar .memdet-meta-mood{ font-size:15px; letter-spacing:0; }
+.memdet-title{ font-family:var(--font-title); font-weight:800; font-size:32px; line-height:1.22; color:var(--ink); margin:14px 28px 0; }
+.memdet-narrative{ font-family:var(--font-body); font-size:16.5px; line-height:1.95; color:var(--ink-mid); white-space:pre-wrap; margin:26px 28px 0; }
+.memdet-narrative.empty{ font-style:italic; color:var(--ink-dim); }
+.memdet-gallery{ display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; margin:30px 28px 0; }
+.memdet-gallery img{ width:100%; height:152px; object-fit:cover; border-radius:var(--rs); border:1px solid var(--border); cursor:zoom-in; transition:transform .2s ease; }
+.memdet-gallery img:hover{ transform:scale(1.02); }
+.memdet-block{ margin:34px 28px 0; padding:2px 0 2px 18px; border-left:2px solid var(--lav-pale); }
+.memdet-block-label{ font-family:var(--font-title); font-style:italic; font-weight:600; font-size:13.5px; color:var(--ink-dim); margin-bottom:9px; }
+.memdet-tags{ display:flex; flex-wrap:wrap; gap:7px; margin:14px 28px 0; }
+.memdet-tag{ font-family:var(--font-mono); font-size:10px; letter-spacing:.5px; background:var(--lav-pale); color:var(--lav); border-radius:20px; padding:5px 12px; }
+.memdet-origin-list{ display:flex; flex-direction:column; gap:8px; }
+.memdet-origin-item{ font-size:14px; color:var(--ink-mid); display:flex; align-items:flex-start; gap:9px; }
+.memdet-origin-item b{ color:var(--ink); font-weight:600; }
+.memdet-progress{ display:inline-flex; align-items:center; gap:8px; margin:28px 28px 0; font-family:var(--font-mono); font-size:11px; letter-spacing:1px; color:var(--gold-d); background:var(--gold-pale); border-radius:20px; padding:8px 16px; }
+.memdet-footer{ display:flex; justify-content:flex-end; padding:30px 28px 32px; }
+.memdet-edit-btn{ background:var(--card2); border:1px solid var(--border2); border-radius:30px; padding:10px 20px; font-family:var(--font-body); font-size:13px; font-weight:600; color:var(--ink-mid); cursor:pointer; transition:all .15s; }
+.memdet-edit-btn:hover{ background:var(--bg3); color:var(--ink); }
+@media (max-width:640px){
+  .memdet-backdrop{ padding:0; }
+  .memdet-page{ border-radius:0; max-width:none; min-height:100vh; margin:0; animation:none; }
+  .memdet-close{ top:14px; right:14px; width:36px; height:36px; }
+  /* Photo bien proportionnée plutôt que rognée façon vignette desktop —
+     un format 4:3 respire et ressemble à une vraie photo de carnet. */
+  .memdet-hero{ aspect-ratio:4/3; min-height:0; }
+  .memdet-hero img{ height:100%; min-height:0; }
+  .memdet-hero-emoji{ font-size:72px; }
+  .memdet-meta-bar{ margin:20px 18px 0; font-size:12.5px; }
+  .memdet-tags{ margin:12px 18px 0; }
+  .memdet-title{ font-size:23px; line-height:1.3; margin:10px 18px 0; }
+  .memdet-narrative{ font-size:16px; line-height:1.85; margin:20px 18px 0; }
+  .memdet-gallery, .memdet-block, .memdet-progress{ margin-left:18px; margin-right:18px; }
+  .memdet-gallery{ margin-top:24px; gap:8px; }
+  .memdet-block{ margin-top:28px; }
+  .memdet-progress{ margin-top:22px; font-size:10px; padding:7px 14px; }
+  .memdet-footer{ padding:20px 18px 26px; justify-content:center; }
+  .memdet-edit-btn{ padding:9px 18px; font-size:12.5px; background:transparent; border-color:var(--border); }
+  .memdet-gallery{ grid-template-columns:repeat(2,1fr); }
+}
+
+/* ───────── MEMORY LIGHTBOX (FEAT-015.1) — galerie photo plein écran ─────────
+   Tap pour ouvrir, swipe gauche/droite pour naviguer, swipe bas / ✕ / tap
+   extérieur pour fermer — comportement proche de Photos iOS / Google Photos. */
+.memlb-backdrop{ position:fixed; inset:0; background:rgba(12,8,4,.93); z-index:100000; display:flex; align-items:center; justify-content:center; animation:fadeIn .15s ease; }
+.memlb-img{ max-width:92vw; max-height:86vh; object-fit:contain; border-radius:4px; user-select:none; -webkit-user-drag:none; touch-action:none; }
+.memlb-close, .memlb-nav{ position:absolute; border:none; border-radius:50%; background:rgba(255,255,255,.12); color:#FAF6ED; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .15s, transform .15s; z-index:2; line-height:1; }
+.memlb-close:hover, .memlb-nav:hover{ background:rgba(255,255,255,.22); }
+.memlb-close{ top:18px; right:18px; width:42px; height:42px; font-size:17px; }
+.memlb-nav{ top:50%; transform:translateY(-50%); width:46px; height:46px; font-size:24px; }
+.memlb-nav.prev{ left:18px; }
+.memlb-nav.next{ right:18px; }
+.memlb-dots{ position:absolute; bottom:22px; left:0; right:0; display:flex; justify-content:center; gap:7px; z-index:2; }
+.memlb-dots span{ width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.35); transition:background .15s, transform .15s; }
+.memlb-dots span.active{ background:#FAF6ED; transform:scale(1.35); }
+@media (max-width:640px){
+  .memlb-nav{ display:none; }
+  .memlb-close{ top:14px; right:14px; }
+}
+
 .mem-photos-upload{ margin-bottom:9px; }
 .mem-photo-add-btn{ padding:9px 17px; border-radius:var(--rs); border:1px dashed var(--border2); background:transparent; color:var(--ink-mid); font-family:var(--font-body); font-size:13px; cursor:pointer; transition:all .2s; }
 .mem-photo-add-btn:hover{ border-color:var(--terra); color:var(--terra); }
@@ -2201,11 +2274,9 @@ function refreshHomeStory(){
       const m=mems[0];
       const photo=(m.photos&&m.photos[0])?m.photos[0]:null;
       const excerpt=m.anecdote?m.anecdote.replace(/</g,'&lt;'):'';
-      // TODO FEAT-015 : ce CTA ("Continuer la lecture") ouvre le souvenir via
-      // openMemoryDetail(), qui redirige aujourd'hui vers la modale d'édition.
-      // Quand FEAT-015 (écran de lecture immersif "détail du souvenir") sera
-      // implémentée, ce CTA devra ouvrir cet écran dédié — aucun changement
-      // de markup nécessaire ici, le hook est centralisé dans openMemoryDetail().
+      // FEAT-015 : ce CTA ("Continuer la lecture") ouvre le souvenir via
+      // openMemoryDetail() → écran de lecture immersif MemoryDetailView
+      // (et non plus la modale d'édition).
       advBlock.innerHTML=`
         <div class="last-adv-card" onclick="openMemoryDetail('${m.id}')">
           ${photo?`<div class="last-adv-photo"><img src="${photo.url}" alt="" loading="lazy"></div>`:`<div class="last-adv-noPhoto">${m.humeur||'📍'}</div>`}
@@ -2685,6 +2756,10 @@ function renderMemories() {
   mems.forEach(mem => {
     const card = document.createElement('div');
     card.className = 'mem-card';
+    card.style.cursor = 'pointer';
+    // FEAT-015 : cliquer sur une carte souvenir ouvre l'écran de lecture immersif,
+    // pas la modale d'édition (les boutons d'action ci-dessous coupent la propagation).
+    card.onclick = () => openMemoryDetail(mem.id);
 
     const questName = _memQuestName(mem.questId);
     const photos = mem.photos || [];
@@ -2708,8 +2783,8 @@ function renderMemories() {
         ${mem.anecdote ? `<div class="mem-card-anecdote">${mem.anecdote.replace(/</g,'&lt;')}</div>` : ''}
       </div>
       <div class="mem-card-actions">
-        <button class="mem-card-btn" onclick="openMemoryModal('${mem.id}')">✏ Modifier</button>
-        <button class="mem-card-btn del" onclick="deleteMemory('${mem.id}')">🗑 Supprimer</button>
+        <button class="mem-card-btn" onclick="event.stopPropagation(); openMemoryModal('${mem.id}')">✏ Modifier</button>
+        <button class="mem-card-btn del" onclick="event.stopPropagation(); deleteMemory('${mem.id}')">🗑 Supprimer</button>
       </div>`;
     grid.appendChild(card);
   });
@@ -2785,9 +2860,8 @@ function _journalEntryHtml(mem) {
   const questName = _memQuestName(mem.questId);
   const photo = (mem.photos && mem.photos[0]) ? mem.photos[0] : null;
   const excerpt = mem.anecdote ? mem.anecdote.replace(/</g,'&lt;') : '';
-  // TODO FEAT-015 : clic sur une entrée de la timeline → openMemoryDetail().
-  // À remplacer par l'écran de lecture immersif "détail du souvenir" une fois
-  // FEAT-015 implémentée (hook déjà centralisé dans openMemoryDetail()).
+  // FEAT-015 : clic sur une entrée de la timeline → openMemoryDetail()
+  // → écran de lecture immersif MemoryDetailView.
   return `
     <div class="journal-entry" onclick="openMemoryDetail('${mem.id}')">
       <div class="journal-marker">${mem.humeur || '📍'}</div>
@@ -2835,13 +2909,243 @@ function renderJournalTimeline() {
     .join('');
 }
 
-// Hook FEAT-015 : ouverture du détail d'un souvenir depuis la timeline.
-// Pour l'instant, redirige vers la modale d'édition existante ; FEAT-015
-// remplacera ce comportement par un écran de lecture immersif dédié.
+// Hook FEAT-015 : ouverture du détail d'un souvenir — depuis la Home
+// ("Continuer la lecture"), le Journal de vie ou la grille Souvenirs.
+// Ouvre désormais l'écran de lecture immersif dédié (MemoryDetailView),
+// et non plus la modale d'édition.
 function openMemoryDetail(memId) {
-  // TODO FEAT-015 : remplacer par l'écran/modal "détail du souvenir".
-  openMemoryModal(memId);
+  openMemoryDetailView(memId);
 }
+
+// ─────────────────────────────────────────
+// MEMORY DETAIL VIEW (FEAT-015) — écran de lecture immersif
+// "Le souvenir devient l'unité émotionnelle principale du produit."
+// Lecture seule : la modification reste accessible via le bouton "Modifier",
+// qui rouvre la modale d'édition existante (openMemoryModal).
+// ─────────────────────────────────────────
+let _memDetCurrentPhotos = [];
+
+function openMemoryDetailView(memId) {
+  const mem = (S.memories || []).find(m => m.id === memId);
+  if (!mem) return;
+
+  const backdrop = document.getElementById('memDetailBackdrop');
+  const hero     = document.getElementById('memDetHero');
+  const photos   = mem.photos || [];
+  const cover    = photos[0] || null;
+  _memDetCurrentPhotos = photos;
+
+  // Hero émotionnel — pure respiration visuelle : photo de couverture
+  // (cliquable → galerie plein écran), ou grand emoji d'humeur sinon.
+  // Les métadonnées ne polluent plus la photo : elles vivent juste en
+  // dessous, dans la barre de contexte (cf. FEAT-015.1, nouvelle hiérarchie).
+  if (cover) {
+    hero.className = 'memdet-hero has-photo';
+    hero.innerHTML = `<img src="${cover.url}" alt="" onclick="openMemoryLightbox(_memDetCurrentPhotos, 0)">`;
+  } else {
+    hero.className = 'memdet-hero no-photo';
+    hero.innerHTML = `<div class="memdet-hero-emoji">${mem.humeur || '📍'}</div>`;
+  }
+
+  // Barre de contexte — repositionnée juste sous la photo (FEAT-015.1) :
+  // avant de lire le récit, le lecteur sait déjà où il était, quand, et
+  // dans quel état d'esprit. Présentée en ligne, façon byline de carnet
+  // de voyage — pas en encadré "fiche".
+  const metaBar = document.getElementById('memDetMetaBar');
+  const metaParts = [];
+  if (mem.date)   metaParts.push(`<span>${_memFormatDate(mem.date)}</span>`);
+  if (mem.lieu)   metaParts.push(`<span>📍 ${mem.lieu}</span>`);
+  if (mem.humeur) metaParts.push(`<span class="memdet-meta-mood">${mem.humeur}</span>`);
+  metaBar.innerHTML = metaParts.join('<span class="memdet-meta-sep">·</span>');
+
+  // Tags — discrets, juste sous la barre de contexte (masqués si absents)
+  const tagsEl = document.getElementById('memDetTags');
+  if (mem.tags && mem.tags.length) {
+    tagsEl.style.display = 'flex';
+    tagsEl.innerHTML = mem.tags.map(t => `<span class="memdet-tag">${t}</span>`).join('');
+  } else {
+    tagsEl.style.display = 'none';
+    tagsEl.innerHTML = '';
+  }
+
+  // Titre
+  document.getElementById('memDetTitle').textContent = mem.title || 'Sans titre';
+
+  // Récit — texte complet, sans troncature, mis en page comme un carnet
+  const narrEl = document.getElementById('memDetNarrative');
+  if (mem.anecdote && mem.anecdote.trim()) {
+    narrEl.textContent = mem.anecdote;
+    narrEl.classList.remove('empty');
+  } else {
+    narrEl.textContent = "Ce moment n'a pas encore de récit écrit.";
+    narrEl.classList.add('empty');
+  }
+
+  // Galerie — photos additionnelles sous le récit, chacune cliquable pour
+  // ouvrir la visionneuse plein écran (FEAT-015.1, swipe gauche/droite).
+  const galleryEl = document.getElementById('memDetGallery');
+  const galleryPhotos = photos.length > 1 ? photos.slice(1) : [];
+  if (galleryPhotos.length) {
+    galleryEl.style.display = 'grid';
+    galleryEl.innerHTML = galleryPhotos.map((p, i) =>
+      `<img src="${p.url}" alt="" loading="lazy" onclick="openMemoryLightbox(_memDetCurrentPhotos, ${i + 1})">`
+    ).join('');
+  } else {
+    galleryEl.style.display = 'none';
+    galleryEl.innerHTML = '';
+  }
+
+  // Origine du souvenir — quête liée (masqué si aucune donnée)
+  const originBlock = document.getElementById('memDetOriginBlock');
+  const originList  = document.getElementById('memDetOriginList');
+  const questName   = _memQuestName(mem.questId);
+  const linkedQuest = mem.questId ? (allQuests() || []).find(q => q.id === mem.questId) : null;
+  if (questName) {
+    originBlock.style.display = 'block';
+    originList.innerHTML = `<div class="memdet-origin-item">✓ <b>${questName}</b></div>`;
+  } else {
+    originBlock.style.display = 'none';
+    originList.innerHTML = '';
+  }
+
+  // Progression — discret, jamais plus important que le souvenir
+  const progEl = document.getElementById('memDetProgress');
+  if (linkedQuest && linkedQuest.xp) {
+    progEl.style.display = 'inline-flex';
+    progEl.textContent = `✨ +${linkedQuest.xp} XP`;
+  } else {
+    progEl.style.display = 'none';
+    progEl.textContent = '';
+  }
+
+  // Bouton "Modifier" — seul point d'entrée vers l'édition depuis cet écran
+  document.getElementById('memDetEditBtn').onclick = () => {
+    closeMemoryDetailView();
+    openMemoryModal(mem.id);
+  };
+
+  backdrop.style.display = 'flex';
+  backdrop.scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMemoryDetailView() {
+  const backdrop = document.getElementById('memDetailBackdrop');
+  if (backdrop) backdrop.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+// ─────────────────────────────────────────
+// MEMORY LIGHTBOX (FEAT-015.1) — galerie photo immersive plein écran
+// "Tap sur une photo → plein écran. Plusieurs photos → swipe gauche/droite."
+// Comportement proche de Photos iOS / Google Photos / Instagram. Fermeture
+// par croix, tap extérieur, ou swipe vers le bas (mobile). Lecture seule —
+// aucune logique métier touchée.
+// ─────────────────────────────────────────
+let _memLbPhotos = [];
+let _memLbIndex = 0;
+let _memLbTouchInit = false;
+
+function openMemoryLightbox(photos, index) {
+  if (!photos || !photos.length) return;
+  _memLbPhotos = photos;
+  _memLbIndex = Math.max(0, Math.min(index || 0, photos.length - 1));
+  _memLbInitTouch();
+  _memLbRender();
+  const bd = document.getElementById('memLightboxBackdrop');
+  bd.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMemoryLightbox() {
+  const bd = document.getElementById('memLightboxBackdrop');
+  if (bd) bd.style.display = 'none';
+  const img = document.getElementById('memLightboxImg');
+  if (img) { img.style.transform = ''; img.style.opacity = ''; }
+  // Le détail souvenir reste ouvert dessous → on conserve le scroll verrouillé.
+  document.body.style.overflow = 'hidden';
+}
+
+function _memLbRender() {
+  const img = document.getElementById('memLightboxImg');
+  img.src = (_memLbPhotos[_memLbIndex] || {}).url || '';
+  const multi = _memLbPhotos.length > 1;
+  document.getElementById('memLbPrev').style.display = multi ? 'flex' : 'none';
+  document.getElementById('memLbNext').style.display = multi ? 'flex' : 'none';
+  const dots = document.getElementById('memLbDots');
+  dots.innerHTML = multi
+    ? _memLbPhotos.map((_, i) => `<span class="${i === _memLbIndex ? 'active' : ''}"></span>`).join('')
+    : '';
+}
+
+function _memLbStep(dir) {
+  if (_memLbPhotos.length < 2) return;
+  _memLbIndex = (_memLbIndex + dir + _memLbPhotos.length) % _memLbPhotos.length;
+  _memLbRender();
+}
+
+// Gestes tactiles — initialisés une seule fois, au premier appel (lazy : le
+// markup de la visionneuse existe déjà dans le DOM à ce moment-là).
+function _memLbInitTouch() {
+  if (_memLbTouchInit) return;
+  const bd  = document.getElementById('memLightboxBackdrop');
+  const img = document.getElementById('memLightboxImg');
+  if (!bd || !img) return;
+  _memLbTouchInit = true;
+
+  let sx = 0, sy = 0, dx = 0, dy = 0, dragging = false;
+
+  bd.addEventListener('touchstart', e => {
+    if (e.touches.length !== 1) return;
+    dragging = true;
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+    dx = 0; dy = 0;
+    img.style.transition = 'none';
+  }, { passive: true });
+
+  bd.addEventListener('touchmove', e => {
+    if (!dragging || e.touches.length !== 1) return;
+    dx = e.touches[0].clientX - sx;
+    dy = e.touches[0].clientY - sy;
+    if (Math.abs(dy) > Math.abs(dx)) {
+      img.style.transform = `translateY(${dy}px)`;
+      img.style.opacity = String(Math.max(.35, 1 - Math.abs(dy) / 380));
+    } else {
+      img.style.transform = `translateX(${dx}px)`;
+    }
+  }, { passive: true });
+
+  bd.addEventListener('touchend', () => {
+    if (!dragging) return;
+    dragging = false;
+    img.style.transition = 'transform .25s ease, opacity .25s ease';
+    if (Math.abs(dy) > Math.abs(dx) && dy > 110) {
+      closeMemoryLightbox();
+      return;
+    }
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) {
+      _memLbStep(dx < 0 ? 1 : -1);
+    }
+    img.style.transform = '';
+    img.style.opacity = '';
+  });
+}
+
+// Clavier — confort desktop : ← → pour naviguer, Échap pour fermer
+// (la visionneuse d'abord, puis le détail souvenir).
+document.addEventListener('keydown', e => {
+  const lb = document.getElementById('memLightboxBackdrop');
+  if (lb && lb.style.display === 'flex') {
+    if (e.key === 'Escape') closeMemoryLightbox();
+    else if (e.key === 'ArrowLeft') _memLbStep(-1);
+    else if (e.key === 'ArrowRight') _memLbStep(1);
+    return;
+  }
+  if (e.key === 'Escape') {
+    const dd = document.getElementById('memDetailBackdrop');
+    if (dd && dd.style.display === 'flex') closeMemoryDetailView();
+  }
+});
 
 // ─────────────────────────────────────────
 // MODAL — OPEN / CLOSE
@@ -3760,6 +4064,41 @@ if (_swEnabled) {
   });
 } // end if (_swEnabled)
 </script>
+<!-- MEMORY DETAIL VIEW (FEAT-015 / FEAT-015.1) — page de carnet immersive.
+     Hiérarchie : photo → contexte (date·lieu·humeur) → titre → récit →
+     galerie → origine → métadonnées discrètes. Fermeture via icône ✕
+     discrète (pas de bouton texte "Retour" qui casserait l'immersion). -->
+<div class="memdet-backdrop" id="memDetailBackdrop" style="display:none" onclick="if(event.target===this) closeMemoryDetailView()">
+  <div class="memdet-page" id="memDetailPage" onclick="event.stopPropagation()">
+    <button class="memdet-close" onclick="closeMemoryDetailView()" aria-label="Fermer">✕</button>
+    <div class="memdet-hero" id="memDetHero"></div>
+    <div class="memdet-meta-bar" id="memDetMetaBar"></div>
+    <div class="memdet-tags" id="memDetTags" style="display:none"></div>
+    <div class="memdet-title" id="memDetTitle"></div>
+    <div class="memdet-narrative" id="memDetNarrative"></div>
+    <div class="memdet-gallery" id="memDetGallery" style="display:none"></div>
+    <div class="memdet-block" id="memDetOriginBlock" style="display:none">
+      <div class="memdet-block-label">Comment ce moment est né</div>
+      <div class="memdet-origin-list" id="memDetOriginList"></div>
+    </div>
+    <div class="memdet-progress" id="memDetProgress" style="display:none"></div>
+    <div class="memdet-footer">
+      <button class="memdet-edit-btn" id="memDetEditBtn">✏ Modifier</button>
+    </div>
+  </div>
+</div>
+
+<!-- MEMORY LIGHTBOX (FEAT-015.1) — galerie photo immersive plein écran.
+     Tap sur une photo du détail souvenir → ouverture ici. Swipe gauche/droite
+     pour naviguer, swipe bas / ✕ / tap extérieur pour fermer (Photos iOS-like). -->
+<div class="memlb-backdrop" id="memLightboxBackdrop" style="display:none" onclick="if(event.target===this) closeMemoryLightbox()">
+  <button class="memlb-close" onclick="closeMemoryLightbox()" aria-label="Fermer">✕</button>
+  <button class="memlb-nav prev" id="memLbPrev" onclick="event.stopPropagation(); _memLbStep(-1)" aria-label="Photo précédente">‹</button>
+  <img class="memlb-img" id="memLightboxImg" src="" alt="" onclick="event.stopPropagation()">
+  <button class="memlb-nav next" id="memLbNext" onclick="event.stopPropagation(); _memLbStep(1)" aria-label="Photo suivante">›</button>
+  <div class="memlb-dots" id="memLbDots"></div>
+</div>
+
 <!-- MEMORY MODAL -->
 <div class="mem-modal-backdrop" id="memModalBackdrop" onclick="closeMemoryModal(event)" style="display:none">
   <div class="mem-modal" id="memModal">
